@@ -340,13 +340,21 @@
     <div class="overlay-stars" id="overlayStars"></div>
     <div class="overlay-score" id="overlayScore"></div>
     <div class="overlay-best" id="overlayBest"></div>
-    <button class="overlay-btn" id="overlayBtn" onclick="resetGame()"></button>
+    <button class="overlay-btn" id="overlayBtn" onclick="overlayBtnClick()"></button>
   </div>
 </div>
 
+<!-- ── Map Screen ── -->
+<div id="map-screen" class="map-screen">
+  <h1 class="map-title" data-i18n="mapTitle">选择关卡</h1>
+  <p class="map-sub" data-i18n="mapSub">完成关卡解锁下一个地点！</p>
+  <div class="map-cards" id="mapCards"></div>
+</div>
+
 <!-- Main game -->
-<div class="game-wrap">
+<div class="game-wrap" id="game-wrap" style="display:none">
   <div class="top-bar">
+    <button class="btn-icon" id="btnMap" onclick="showMapScreen()" title="Map">🗺️</button>
     <button class="btn-icon" id="btnLang" onclick="toggleLang()">
       <span id="langFlag">🇨🇳</span><span id="langLabel">中文</span>
     </button>
