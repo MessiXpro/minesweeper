@@ -454,7 +454,7 @@
         <span class="mascot-sparkle s1">✨</span>
         <span class="mascot-sparkle s2">⭐</span>
         <span class="mascot-sparkle s3">✦</span>
-        <svg width="128" height="158" viewBox="0 0 130 160" xmlns="http://www.w3.org/2000/svg">
+        <svg width="128" height="158" viewBox="0 0 130 160" xmlns="http://www.w3.org/2000/svg" style="cursor:pointer" onclick="showCatPhrase()">
           <ellipse cx="65" cy="132" rx="42" ry="30" fill="#F97316"/>
           <path d="M26 122 Q65 140 104 122" stroke="#3B82F6" stroke-width="11" fill="none" stroke-linecap="round"/>
           <path d="M26 122 Q65 134 104 122 Q100 130 92 128 Q65 138 38 128 Q30 130 26 122Z" fill="#2563EB" opacity=".6"/>
@@ -817,6 +817,7 @@ function initGame(){
   });
   clearInterval(state.timerInterval);clearTimeout(state.comboTimer);
   state.timerInterval=null;state.comboTimer=null;
+  resetIdleTimer();
   renderGrid();updateUI();updateLivesUI();updatePowerupUI();setPlayBtn(false);
   setSpeech(pick(t('idle')));updateStars();
   document.getElementById('overlay').classList.remove('show');
@@ -1017,6 +1018,7 @@ function checkWin(){if(state.revealedSafe>=state.totalSafe)endGame(true);}
 function endGame(won){
   state.gameOver=true;state.won=won;
   clearInterval(state.timerInterval);clearTimeout(state.comboTimer);state.timerInterval=null;stopBGM();
+  clearTimeout(idleTimer);
   if(won){
     const timeBon=Math.max(0,500-state.elapsed*2);const lifeBon=state.lives*80;
     state.score+=timeBon+state.mines*20+lifeBon;
@@ -1170,6 +1172,26 @@ function setTurtleMood(mood,duration){
   wrap.classList.remove('turtle--scared','turtle--happy');
   if(mood!=='default')wrap.classList.add(`turtle--${mood}`);
   if(duration)setTimeout(()=>{const w=document.querySelector('.turtle-wrap');if(w){w.classList.remove(`turtle--${mood}`);}},duration);
+}
+
+function showCatPhrase(){
+  const phrases=t('catPhrases');
+  const text=phrases[catPhraseIdx%phrases.length];catPhraseIdx++;
+  const wrap=document.querySelector('.mascot-wrap');if(!wrap)return;
+  const old=wrap.querySelector('.click-phrase');if(old)old.remove();
+  const el=document.createElement('div');el.className='click-phrase';el.textContent=text;
+  wrap.appendChild(el);setTimeout(()=>el.remove(),2600);
+}
+
+function resetIdleTimer(){
+  clearTimeout(idleTimer);
+  idleTimer=setTimeout(()=>{
+    if(state.gameStarted&&!state.gameOver&&!state.paused){
+      showCatPhrase();
+      if(mascotMood==='default')setMascotMood('cheer',900);
+    }
+    resetIdleTimer();
+  },30000);
 }
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
