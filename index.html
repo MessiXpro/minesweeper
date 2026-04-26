@@ -592,6 +592,9 @@ const I18N={
     winTitle:'你赢了！',winSub:'太棒了，小超级明星！',loseTitle:'轰！',loseSub:'小心那些炸弹！',
     playAgain:'再玩一次！',scoreLabel:'得分：',bestLabel:'最高纪录：',newBest:'🎉 新纪录！',bestChip:'最佳',
     achUnlock:'成就解锁',
+    mapTitle:'选择关卡',mapSub:'完成关卡解锁下一个地点！',mapBtn:'返回地图',
+    specialStar:'⭐ 幸运星！+50分奖励！',specialChest:'💎 宝箱！获得一个提示！',specialBoost:'⚡ 加速！计时暂停5秒！',
+    catPhrases:['加油！你一定行的！','仔细想想，答案就在眼前！','好棒！继续保持！','没关系，再试一次！','你是最厉害的小探险家！','相信自己！','慢慢来，不着急～','耶！离胜利不远了！'],
     ach:{
       firstSteps:{e:'🌟',n:'初次探险！'},
       lightning: {e:'⚡',n:'闪电速度！'},
@@ -616,6 +619,9 @@ const I18N={
     winTitle:'You Win!',winSub:'Amazing work, superstar!',loseTitle:'Boom!',loseSub:'Watch out for those bombs!',
     playAgain:'Play Again!',scoreLabel:'Score: ',bestLabel:'Best: ',newBest:'🎉 New Record!',bestChip:'Best',
     achUnlock:'Achievement Unlocked',
+    mapTitle:'Choose Level',mapSub:'Complete a level to unlock the next!',mapBtn:'Back to Map',
+    specialStar:'⭐ Lucky Star! +50 bonus!',specialChest:'💎 Treasure! Got a hint!',specialBoost:'⚡ Boost! Timer paused 5s!',
+    catPhrases:['You can do it!','Think carefully, the answer is close!','Great job, keep it up!','No worries, try again!','You are the greatest explorer!','Believe in yourself!','Take your time~','Woohoo! Victory is near!'],
     ach:{
       firstSteps:{e:'🌟',n:'First Steps!'},
       lightning: {e:'⚡',n:'Lightning!'},
@@ -630,6 +636,72 @@ let lang=localStorage.getItem('sweeper-lang')||'zh';
 const t=k=>I18N[lang][k]||k;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 
+// ─── Map screen state ──────────────────────────────────────────────────────────
+let currentScreen='map';
+let mascotMood='default';
+let catPhraseIdx=0;
+let idleTimer=null;
+
+const getUnlockedLevel=()=>parseInt(localStorage.getItem('sweeper-unlock')||'1');
+const setUnlockedLevel=n=>{if(n>getUnlockedLevel())localStorage.setItem('sweeper-unlock',String(n));};
+const getStars=lv=>parseInt(localStorage.getItem(`sweeper-stars-${lv}`)||'0');
+const setStars=(lv,s)=>{if(s>getStars(lv))localStorage.setItem(`sweeper-stars-${lv}`,String(s));};
+
+const MAP_SCENES=[
+  `<svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="48" cy="48" r="48" fill="#4ADE80"/><circle cx="48" cy="48" r="40" fill="#22C55E"/><rect x="44" y="62" width="8" height="20" rx="3" fill="#92400E"/><polygon points="48,10 20,52 76,52" fill="#15803D"/><polygon points="48,22 24,58 72,58" fill="#166534"/><polygon points="48,30 28,62 68,62" fill="#14532D"/><circle cx="76" cy="22" r="10" fill="#FDE68A"/></svg>`,
+  `<svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="48" cy="48" r="48" fill="#FBBF24"/><circle cx="48" cy="48" r="40" fill="#F59E0B"/><path d="M8 80 Q28 56 48 70 Q68 84 88 66 L88 88 L8 88Z" fill="#D97706"/><rect x="45" y="28" width="6" height="42" rx="3" fill="#15803D"/><rect x="29" y="42" width="16" height="6" rx="3" fill="#15803D"/><rect x="51" y="34" width="16" height="6" rx="3" fill="#15803D"/><circle cx="72" cy="24" r="12" fill="#FDE68A" opacity=".9"/></svg>`,
+  `<svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="48" cy="48" r="48" fill="#38BDF8"/><circle cx="48" cy="48" r="40" fill="#0284C7"/><path d="M8 60 Q20 48 32 60 Q44 72 56 60 Q68 48 80 60 L88 88 L8 88Z" fill="#0369A1"/><ellipse cx="36" cy="46" rx="13" ry="7" fill="#FDE68A"/><polygon points="49,46 58,40 58,52" fill="#FDE68A"/><circle cx="31" cy="44" r="2" fill="#1F2937"/><circle cx="68" cy="24" r="10" fill="#FDE68A"/></svg>`,
+  `<svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="48" cy="48" r="48" fill="#BAE6FD"/><circle cx="48" cy="48" r="40" fill="#E0F2FE"/><polygon points="48,12 12,76 84,76" fill="white"/><polygon points="48,12 30,52 66,52" fill="#BAE6FD"/><circle cx="18" cy="28" r="3" fill="white" opacity=".8"/><circle cx="76" cy="20" r="2.5" fill="white" opacity=".8"/><text x="48" y="90" font-size="18" text-anchor="middle" fill="#0284C7">❄️</text></svg>`,
+  `<svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="48" cy="48" r="48" fill="#1E1B4B"/><circle cx="48" cy="48" r="40" fill="#312E81"/><circle cx="20" cy="20" r="2" fill="white"/><circle cx="72" cy="14" r="1.5" fill="white"/><circle cx="82" cy="38" r="2" fill="#FDE68A"/><circle cx="12" cy="62" r="1.5" fill="white"/><circle cx="84" cy="72" r="2" fill="white"/><circle cx="30" cy="78" r="1.5" fill="#FDE68A"/><rect x="42" y="34" width="12" height="30" rx="6" fill="#F87171"/><polygon points="48,22 42,36 54,36" fill="#FECDD3"/><rect x="35" y="50" width="7" height="14" rx="3" fill="#FCA5A5"/><rect x="54" y="50" width="7" height="14" rx="3" fill="#FCA5A5"/><circle cx="48" cy="50" r="5" fill="#BFDBFE"/><path d="M44 64 Q48 78 52 64" fill="#FB923C" opacity=".9"/></svg>`,
+];
+
+function renderMapScreen(){
+  const unlocked=getUnlockedLevel();
+  const names={zh:['🌲 森林','🏜️ 沙漠','🌊 海洋','⛰️ 雪山','🚀 太空'],en:['🌲 Forest','🏜️ Desert','🌊 Ocean','⛰️ Snow','🚀 Space']};
+  const diffs={zh:['入门·6×6','初级·8×8','中级·9×9','高级·10×10','专家·10×10'],en:['Starter·6×6','Easy·8×8','Medium·9×9','Hard·10×10','Expert·10×10']};
+  const container=document.getElementById('mapCards');if(!container)return;
+  container.innerHTML=[1,2,3,4,5].map(lv=>{
+    const locked=lv>unlocked;
+    const s=getStars(lv);
+    const starStr=s>0?'⭐'.repeat(s)+'☆'.repeat(3-s):'☆☆☆';
+    return `<div class="level-card${locked?' locked':''}" id="lvcard-${lv}"${locked?'':` onclick="enterLevel(${lv})"`}>`+
+      `<div class="level-card-scene">${MAP_SCENES[lv-1]}</div>`+
+      `<div class="level-card-name">${names[lang][lv-1]}</div>`+
+      `<div class="level-card-diff">${diffs[lang][lv-1]}</div>`+
+      `<div class="level-card-stars">${starStr}</div>`+
+      (locked?'<div class="level-card-lock">🔒</div>':'')+
+      `</div>`;
+  }).join('');
+}
+
+function showMapScreen(){
+  currentScreen='map';
+  renderMapScreen();
+  document.getElementById('map-screen').style.display='flex';
+  document.getElementById('game-wrap').style.display='none';
+  if(state._justUnlocked){
+    const lv=state._justUnlocked;state._justUnlocked=null;
+    setTimeout(()=>{const card=document.getElementById(`lvcard-${lv}`);if(card)card.classList.add('just-unlocked');},300);
+  }
+}
+
+function showGameScreen(){
+  currentScreen='game';
+  document.getElementById('map-screen').style.display='none';
+  document.getElementById('game-wrap').style.display='';
+}
+
+function enterLevel(n){
+  state.level=n;state.hints=3;state.peeks=3;state.safeDigs=3;
+  showGameScreen();initGame();
+  document.getElementById('levelSelect').value=n;
+}
+
+function overlayBtnClick(){
+  document.getElementById('overlay').classList.remove('show');
+  if(state.won){showMapScreen();}else{resetGame();}
+}
+
 function applyLang(){
   document.documentElement.lang=lang;
   document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
@@ -641,6 +713,7 @@ function applyLang(){
   document.getElementById('turtleBubble').textContent=pick(t('turtle'));
   document.getElementById('overlayBtn').textContent=t('playAgain');
   renderBestBar();
+  if(currentScreen==='map')renderMapScreen();
 }
 function toggleLang(){lang=lang==='zh'?'en':'zh';localStorage.setItem('sweeper-lang',lang);applyLang();}
 
@@ -1015,7 +1088,7 @@ setInterval(()=>{document.getElementById('turtleBubble').textContent=pick(t('tur
 
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 applyLang();
-initGame();
+showMapScreen();
 </script>
 </body>
 </html>
