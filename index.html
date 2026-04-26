@@ -797,6 +797,7 @@ let state={
   hints:3,peeks:3,safeDigs:3,flagsLeft:0,totalSafe:0,revealedSafe:0,
   lives:MAX_LIVES,mineHits:0,
   combo:0,comboTimer:null,bestCombo:0,
+  specials:[],boostActive:false,_justUnlocked:null,
 };
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
@@ -961,6 +962,7 @@ function endGame(won){
     state.score+=timeBon+state.mines*20+lifeBon;
     playWin();spawnConfetti();setSpeech(t('winTitle'));updateStars();
     const stars=getStarCount();
+    if(state.level<5){setUnlockedLevel(state.level+1);state._justUnlocked=state.level+1;}
     setTimeout(()=>{checkAchievements(true,stars);showOverlay(true);},800);
   }else{
     revealAllMines();setSpeech('😅');
@@ -975,6 +977,7 @@ function revealAllMines(){
 function showOverlay(won){
   const stars=getStarCount();
   const isNew=won&&setBest(state.level,state.score);
+  if(won)setStars(state.level,stars);
   document.getElementById('overlayEmoji').textContent=won?'🎉':'😅';
   document.getElementById('overlayTitle').textContent=won?t('winTitle'):t('loseTitle');
   document.getElementById('overlayTitle').style.color=won?'#16A34A':'#DC2626';
@@ -982,7 +985,7 @@ function showOverlay(won){
   document.getElementById('overlayStars').textContent=won?'⭐'.repeat(stars)+'☆'.repeat(3-stars):'💥💥💥';
   document.getElementById('overlayScore').textContent=t('scoreLabel')+state.score.toLocaleString();
   document.getElementById('overlayBest').textContent=isNew?t('newBest'):(won?t('bestLabel')+getBest(state.level).toLocaleString():'');
-  document.getElementById('overlayBtn').textContent=t('playAgain');
+  document.getElementById('overlayBtn').textContent=won?t('mapBtn'):t('playAgain');
   document.getElementById('overlay').classList.add('show');
   if(won)renderBestBar();
 }
