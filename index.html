@@ -900,6 +900,8 @@ function triggerCombo(count,r,c){
   if(bonus>0)state.score+=bonus;
   showFloatScore(r,c,pts,mult);
   if(state.combo>=3){
+    if(state.combo===3)setMascotMood('happy',2200);
+    if(state.combo===6)setMascotMood('cheer');
     playCombo();
     const badge=document.getElementById('comboBadge');
     badge.textContent=t('comboText').replace('{n}',state.combo);
@@ -908,7 +910,7 @@ function triggerCombo(count,r,c){
     state._comboHide=setTimeout(()=>badge.classList.remove('show'),1400);
     if(state.combo===6)setTimeout(()=>unlockAch('comboKing'),200);
   }
-  state.comboTimer=setTimeout(()=>{state.combo=0;},2500);
+  state.comboTimer=setTimeout(()=>{state.combo=0;if(mascotMood==='happy'||mascotMood==='cheer')setMascotMood('default');},2500);
 }
 
 // ─── Float score ──────────────────────────────────────────────────────────────
@@ -963,6 +965,7 @@ function handleClick(r,c){
     playMine();playLoseLife();
     state.lives--;updateLivesUI();
     setMascotMood('scared',1300);
+    setTurtleMood('scared',1500);
     // Heart break animation
     const lv=document.getElementById('livesDisplay');if(lv)lv.classList.add('break');setTimeout(()=>lv&&lv.classList.remove('break'),500);
     if(state.lives<=0){endGame(false);}
@@ -1019,12 +1022,14 @@ function endGame(won){
     state.score+=timeBon+state.mines*20+lifeBon;
     playWin();spawnConfetti();setSpeech(t('winTitle'));updateStars();
     setMascotMood('happy');
+    setTurtleMood('happy');
     const stars=getStarCount();
     if(state.level<5){setUnlockedLevel(state.level+1);state._justUnlocked=state.level+1;}
     setTimeout(()=>{checkAchievements(true,stars);showOverlay(true);},800);
   }else{
     revealAllMines();setSpeech('😅');
     setMascotMood('cry');
+    setTurtleMood('scared',3000);
     setTimeout(()=>showOverlay(false),1200);
   }
   updateUI();setPlayBtn(false);
@@ -1158,6 +1163,13 @@ function setMascotMood(mood,duration){
     }
   }
   if(duration)setTimeout(()=>{if(mascotMood===mood)setMascotMood('default');},duration);
+}
+
+function setTurtleMood(mood,duration){
+  const wrap=document.querySelector('.turtle-wrap');if(!wrap)return;
+  wrap.classList.remove('turtle--scared','turtle--happy');
+  if(mood!=='default')wrap.classList.add(`turtle--${mood}`);
+  if(duration)setTimeout(()=>{const w=document.querySelector('.turtle-wrap');if(w){w.classList.remove(`turtle--${mood}`);}},duration);
 }
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
