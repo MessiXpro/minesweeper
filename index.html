@@ -711,7 +711,7 @@ function applyLang(){
   setPlayBtn(state.gameStarted&&!state.gameOver);
   if(!state.gameStarted)setSpeech(pick(t('idle')));
   document.getElementById('turtleBubble').textContent=pick(t('turtle'));
-  document.getElementById('overlayBtn').textContent=t('playAgain');
+  document.getElementById('overlayBtn').textContent=state.gameOver&&state.won?t('mapBtn'):t('playAgain');
   renderBestBar();
   if(currentScreen==='map')renderMapScreen();
 }
@@ -997,7 +997,7 @@ function chordReveal(r,c){
         if(state.board[nr][nc]===-1){
           state.revealed[nr][nc]=true;state.mineHits++;state.lives--;
           const tile=getTileEl(nr,nc);if(tile){tile.classList.remove('hidden');tile.classList.add('mine-hit');tile.textContent='💣';}
-          playMine();updateLivesUI();
+          playMine();updateLivesUI();setMascotMood('scared',1300);setTurtleMood('scared',1500);
           if(state.lives<=0)endGame(false);
         }else{const cnt=floodReveal(nr,nc);triggerCombo(cnt,nr,nc);}
       }
@@ -1009,7 +1009,9 @@ function chordReveal(r,c){
 function toggleFlag(r,c){
   if(state.gameOver||state.paused||state.revealed[r][c]||!state.gameStarted)return;
   state.flagged[r][c]=!state.flagged[r][c];state.flagsLeft+=state.flagged[r][c]?-1:1;playFlag();
-  const tile=getTileEl(r,c);if(tile){tile.classList.toggle('flagged',state.flagged[r][c]);tile.classList.toggle('hidden',!state.flagged[r][c]);renderTile(tile,r,c);}
+  const tile=getTileEl(r,c);if(tile){tile.classList.toggle('flagged',state.flagged[r][c]);tile.classList.toggle('hidden',!state.flagged[r][c]);renderTile(tile,r,c);
+    if(state.flagged[r][c]){tile.classList.remove('sp-star','sp-chest','sp-boost');}
+    else if(state.specials[r]&&state.specials[r][c]){tile.classList.add(`sp-${state.specials[r][c]}`);}}
   updateUI();
 }
 
