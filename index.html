@@ -812,6 +812,8 @@ function initGame(){
     score:0,elapsed:0,paused:false,
     totalSafe:cfg.size*cfg.size-cfg.mines,revealedSafe:0,flagsLeft:cfg.mines,
     lives:MAX_LIVES,mineHits:0,combo:0,bestCombo:0,
+    specials:Array.from({length:cfg.size},()=>Array(cfg.size).fill(null)),
+    boostActive:false,
   });
   clearInterval(state.timerInterval);clearTimeout(state.comboTimer);
   state.timerInterval=null;state.comboTimer=null;
@@ -828,9 +830,27 @@ function placeMines(er,ec){
   let placed=0;
   while(placed<state.mines){const r=Math.floor(Math.random()*state.size),c=Math.floor(Math.random()*state.size);if(state.board[r][c]!==-1&&!excl.has(r*state.size+c)){state.board[r][c]=-1;placed++;}}
   for(let r=0;r<state.size;r++)for(let c=0;c<state.size;c++)if(state.board[r][c]!==-1)state.board[r][c]=neighborMines(r,c);
+  placeSpecials();applySpecialGlow();
 }
 function neighborMines(r,c){
   let n=0;for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){const nr=r+dr,nc=c+dc;if(nr>=0&&nr<state.size&&nc>=0&&nc<state.size&&state.board[nr][nc]===-1)n++;}return n;
+}
+
+function placeSpecials(){
+  const types=['star','chest','boost'];
+  const count=state.level<=2?2:3;
+  const candidates=[];
+  for(let r=0;r<state.size;r++)for(let c=0;c<state.size;c++)
+    if(state.board[r][c]>0)candidates.push([r,c]);
+  for(let i=candidates.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[candidates[i],candidates[j]]=[candidates[j],candidates[i]];}
+  candidates.slice(0,count).forEach(([r,c],i)=>{state.specials[r][c]=types[i%types.length];});
+}
+
+function applySpecialGlow(){
+  for(let r=0;r<state.size;r++)for(let c=0;c<state.size;c++){
+    const sp=state.specials[r]&&state.specials[r][c];if(!sp)continue;
+    const tile=getTileEl(r,c);if(tile)tile.classList.add(`sp-${sp}`);
+  }
 }
 
 // ─── Combo ────────────────────────────────────────────────────────────────────
