@@ -962,6 +962,7 @@ function handleClick(r,c){
     const tile=getTileEl(r,c);if(tile){tile.classList.remove('hidden');tile.classList.add('mine-hit');tile.textContent='💣';}
     playMine();playLoseLife();
     state.lives--;updateLivesUI();
+    setMascotMood('scared',1300);
     // Heart break animation
     const lv=document.getElementById('livesDisplay');if(lv)lv.classList.add('break');setTimeout(()=>lv&&lv.classList.remove('break'),500);
     if(state.lives<=0){endGame(false);}
@@ -1017,11 +1018,13 @@ function endGame(won){
     const timeBon=Math.max(0,500-state.elapsed*2);const lifeBon=state.lives*80;
     state.score+=timeBon+state.mines*20+lifeBon;
     playWin();spawnConfetti();setSpeech(t('winTitle'));updateStars();
+    setMascotMood('happy');
     const stars=getStarCount();
     if(state.level<5){setUnlockedLevel(state.level+1);state._justUnlocked=state.level+1;}
     setTimeout(()=>{checkAchievements(true,stars);showOverlay(true);},800);
   }else{
     revealAllMines();setSpeech('😅');
+    setMascotMood('cry');
     setTimeout(()=>showOverlay(false),1200);
   }
   updateUI();setPlayBtn(false);
@@ -1131,6 +1134,31 @@ function updateUI(){document.getElementById('scoreDisplay').textContent=state.sc
 // ─── Speech ───────────────────────────────────────────────────────────────────
 function setSpeech(text){document.getElementById('speechBubble').innerHTML=text.replace(/\n/g,'<br>');}
 function updateSpeech(){const pct=state.revealedSafe/state.totalSafe;setSpeech(pick(pct>.7?t('warn'):t('good')));}
+
+// ─── Mascot moods ─────────────────────────────────────────────────────────────
+function setMascotMood(mood,duration){
+  const wrap=document.querySelector('.mascot-wrap');if(!wrap)return;
+  wrap.classList.remove('mascot--happy','mascot--scared','mascot--cheer','mascot--cry');
+  if(mood!=='default')wrap.classList.add(`mascot--${mood}`);
+  mascotMood=mood;
+  // Expression overlay emoji
+  const old=wrap.querySelector('.mascot-expr');if(old)old.remove();
+  const exprMap={happy:'😊',scared:'😱',cheer:'💪',cry:'😢'};
+  if(exprMap[mood]){
+    const expr=document.createElement('div');expr.className='mascot-expr';expr.textContent=exprMap[mood];
+    wrap.appendChild(expr);setTimeout(()=>expr.remove(),1300);
+  }
+  // Star particles on happy / cheer
+  if(mood==='happy'||mood==='cheer'){
+    for(let i=0;i<4;i++){
+      const p=document.createElement('div');p.className='cat-star-particle';p.textContent='⭐';
+      const angle=Math.random()*Math.PI*2,dist=38+Math.random()*28;
+      p.style.cssText=`left:50%;top:35%;--tx:${Math.cos(angle)*dist}px;--ty:${Math.sin(angle)*dist-18}px;animation-delay:${i*0.1}s`;
+      wrap.appendChild(p);setTimeout(()=>p.remove(),950);
+    }
+  }
+  if(duration)setTimeout(()=>{if(mascotMood===mood)setMascotMood('default');},duration);
+}
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 let toastTimer=null;
