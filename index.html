@@ -853,6 +853,41 @@ function applySpecialGlow(){
   }
 }
 
+function triggerSpecial(r,c){
+  const sp=state.specials[r]&&state.specials[r][c];if(!sp)return;
+  state.specials[r][c]=null;
+  const tile=getTileEl(r,c);
+  if(tile){tile.classList.remove(`sp-${sp}`);tile.classList.add('special-pop');setTimeout(()=>tile.classList.remove('special-pop'),420);}
+  // Floating icon
+  const grid=document.getElementById('gameGrid');
+  if(tile&&grid){
+    const gr=grid.getBoundingClientRect(),tr=tile.getBoundingClientRect();
+    const icon=document.createElement('div');icon.className='special-icon-overlay';
+    icon.textContent=sp==='star'?'⭐':sp==='chest'?'💎':'⚡';
+    icon.style.cssText=`left:${tr.left-gr.left+tr.width/2-20}px;top:${tr.top-gr.top-10}px`;
+    grid.appendChild(icon);setTimeout(()=>icon.remove(),1050);
+  }
+  // Apply effect
+  if(sp==='star'){state.score+=50;updateUI();showToast(t('specialStar'));}
+  else if(sp==='chest'){state.hints=Math.min(state.hints+1,9);updatePowerupUI();showToast(t('specialChest'));}
+  else if(sp==='boost'){activateBoost();}
+}
+
+function activateBoost(){
+  if(state.boostActive)return;
+  state.boostActive=true;
+  clearInterval(state.timerInterval);state.timerInterval=null;
+  const timerEl=document.getElementById('timerDisplay');
+  if(timerEl)timerEl.closest('.stat-panel').classList.add('timer-boost');
+  showToast(t('specialBoost'));
+  setTimeout(()=>{
+    state.boostActive=false;
+    const el=document.getElementById('timerDisplay');
+    if(el)el.closest('.stat-panel').classList.remove('timer-boost');
+    if(!state.gameOver&&!state.paused&&state.gameStarted)startTimer();
+  },5000);
+}
+
 // ─── Combo ────────────────────────────────────────────────────────────────────
 function comboMultiplier(n){if(n>=8)return 3;if(n>=5)return 2;if(n>=3)return 1.5;return 1;}
 function triggerCombo(count,r,c){
@@ -904,7 +939,8 @@ function floodReveal(r,c){
     if(cr<0||cr>=state.size||cc<0||cc>=state.size)continue;
     if(state.revealed[cr][cc]||state.flagged[cr][cc])continue;
     state.revealed[cr][cc]=true;
-    if(state.board[cr][cc]!==-1){state.revealedSafe++;state.score+=10;count++;}
+    if(state.board[cr][cc]!==-1){state.revealedSafe++;state.score+=10;count++;
+      if(state.specials[cr]&&state.specials[cr][cc])setTimeout(()=>triggerSpecial(cr,cc),220);}
     const tile=getTileEl(cr,cc);
     if(tile){tile.classList.remove('hidden');tile.classList.add('revealed','reveal-anim');setTimeout(()=>tile.classList.remove('reveal-anim'),300);renderTile(tile,cr,cc);}
     if(state.board[cr][cc]===0)for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++)queue.push([cr+dr,cc+dc]);
