@@ -1,0 +1,10 @@
+# Claude Code local settings (contains machine-specific paths)
+.claude/
+
+# Superpowers brainstorm session data
+.superpowers/
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
