@@ -311,6 +311,33 @@
     .level-card.just-unlocked .level-card-lock{animation:unlockPop .6s ease forwards;opacity:0;}
     @keyframes unlockPop{0%{transform:scale(1.2);opacity:1}100%{transform:scale(0.4);opacity:0}}
 
+    /* ── Map action buttons ── */
+    .map-action-btns{display:flex;gap:12px;margin-bottom:18px;justify-content:center;}
+    .map-action-btn{font-family:'Fredoka One',cursive;font-size:16px;padding:10px 22px;border-radius:22px;border:2.5px solid rgba(255,255,255,0.7);background:rgba(255,255,255,0.22);color:white;cursor:pointer;backdrop-filter:blur(10px);box-shadow:0 4px 18px rgba(40,20,100,0.25);transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .18s;text-shadow:0 2px 6px rgba(0,0,0,0.22);}
+    .map-action-btn:hover{transform:translateY(-4px) scale(1.07);box-shadow:0 10px 28px rgba(40,20,100,0.38);}
+    .map-daily-btn{border-color:rgba(255,220,80,0.7);background:rgba(255,200,40,0.25);}
+    .map-stats-btn{border-color:rgba(140,200,255,0.7);background:rgba(80,160,255,0.2);}
+    /* ── Modal overlay ── */
+    .modal-overlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(10,5,40,0.55);backdrop-filter:blur(4px);}
+    .modal-overlay.show{display:flex;}
+    .modal-card{background:linear-gradient(160deg,rgba(255,255,255,0.96),rgba(240,235,255,0.98));border-radius:32px;padding:32px 28px 24px;max-width:420px;width:90%;box-shadow:0 24px 64px rgba(40,20,100,0.42);border:2.5px solid rgba(255,255,255,0.9);text-align:center;}
+    .modal-title{font-family:'Fredoka One',cursive;font-size:26px;color:#3D2F7A;margin-bottom:10px;}
+    .modal-sub{font-size:14px;font-weight:700;color:#7B6BAF;margin-bottom:18px;}
+    .modal-close-btn{font-family:'Fredoka One',cursive;font-size:17px;padding:11px 32px;border-radius:18px;border:none;background:linear-gradient(135deg,#A78BFA,#7C3AED);color:white;cursor:pointer;box-shadow:0 4px 16px rgba(124,58,237,0.35);transition:transform .15s;margin-top:16px;display:inline-block;}
+    .modal-close-btn:hover{transform:scale(1.05);}
+    .modal-close-btn--ghost{background:rgba(124,58,237,0.1);color:#7C3AED;box-shadow:none;border:2px solid rgba(124,58,237,0.3);}
+    /* ── Stats grid ── */
+    .stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;}
+    .stat-box{background:rgba(124,58,237,0.08);border-radius:16px;padding:14px 10px;border:1.5px solid rgba(124,58,237,0.15);}
+    .stat-box-val{font-family:'Fredoka One',cursive;font-size:28px;color:#3D2F7A;}
+    .stat-box-lbl{font-size:11px;font-weight:800;color:#A090C8;letter-spacing:1px;text-transform:uppercase;margin-top:3px;}
+    .stats-best-times{grid-column:1/-1;background:rgba(124,58,237,0.06);border-radius:16px;padding:14px;border:1.5px solid rgba(124,58,237,0.12);text-align:left;}
+    .stats-best-label{font-family:'Fredoka One',cursive;font-size:14px;color:#5B4BA0;margin-bottom:8px;}
+    .stats-best-row{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:#6B5B9A;padding:3px 0;border-bottom:1px solid rgba(124,58,237,0.08);}
+    /* ── Daily done badge ── */
+    .daily-done-badge{font-size:48px;margin:10px 0;}
+    .daily-done-text{font-family:'Fredoka One',cursive;font-size:18px;color:#3D2F7A;margin-bottom:6px;}
+    .daily-streak{font-size:13px;font-weight:700;color:#A090C8;}
     /* ── Special Tiles ── */
     @keyframes glowGold{0%,100%{box-shadow:0 5px 0 #7060B8,inset 0 1px 0 rgba(255,255,255,.45),0 2px 10px rgba(80,50,180,.25),0 0 4px 0 rgba(255,215,0,.25)}50%{box-shadow:0 5px 0 #7060B8,inset 0 1px 0 rgba(255,255,255,.45),0 2px 10px rgba(80,50,180,.25),0 0 14px 5px rgba(255,215,0,.6)}}
     @keyframes glowBlue{0%,100%{box-shadow:0 5px 0 #7060B8,inset 0 1px 0 rgba(255,255,255,.45),0 2px 10px rgba(80,50,180,.25),0 0 4px 0 rgba(56,189,248,.25)}50%{box-shadow:0 5px 0 #7060B8,inset 0 1px 0 rgba(255,255,255,.45),0 2px 10px rgba(80,50,180,.25),0 0 14px 5px rgba(56,189,248,.6)}}
@@ -410,10 +437,34 @@
   </div>
 </div>
 
+<!-- ── Stats Modal ── -->
+<div class="modal-overlay" id="statsModal" onclick="if(event.target===this)closeStats()">
+  <div class="modal-card">
+    <h2 class="modal-title" id="statsTitle"></h2>
+    <div class="stats-grid" id="statsGrid"></div>
+    <button class="modal-close-btn" onclick="closeStats()" id="statsCloseBtn"></button>
+  </div>
+</div>
+
+<!-- ── Daily Modal ── -->
+<div class="modal-overlay" id="dailyModal" onclick="if(event.target===this)closeDailyModal()">
+  <div class="modal-card">
+    <h2 class="modal-title" id="dailyModalTitle"></h2>
+    <p class="modal-sub" id="dailyModalSub"></p>
+    <div id="dailyModalContent"></div>
+    <button class="modal-close-btn" id="dailyModalBtn" onclick="startDailyChallenge()"></button>
+    <button class="modal-close-btn modal-close-btn--ghost" onclick="closeDailyModal()" id="dailyCloseBtn" style="margin-top:8px"></button>
+  </div>
+</div>
+
 <!-- ── Map Screen ── -->
 <div id="map-screen" class="map-screen">
   <h1 class="map-title" data-i18n="mapTitle">选择关卡</h1>
   <p class="map-sub" data-i18n="mapSub">完成关卡解锁下一个地点！</p>
+  <div class="map-action-btns">
+    <button class="map-action-btn map-daily-btn" onclick="openDailyModal()" id="mapDailyBtn">📅 <span data-i18n="dailyBtn">每日挑战</span></button>
+    <button class="map-action-btn map-stats-btn" onclick="openStats()" id="mapStatsBtn">📊 <span data-i18n="statsBtn">统计</span></button>
+  </div>
   <div class="map-cards" id="mapCards"></div>
 </div>
 
@@ -442,6 +493,11 @@
           <option value="3" selected data-i18n-opt="lv3"></option>
           <option value="4" data-i18n-opt="lv4"></option>
           <option value="5" data-i18n-opt="lv5"></option>
+          <option value="6" data-i18n-opt="lv6"></option>
+          <option value="7" data-i18n-opt="lv7"></option>
+          <option value="8" data-i18n-opt="lv8"></option>
+          <option value="9" data-i18n-opt="lv9"></option>
+          <option value="10" data-i18n-opt="lv10"></option>
         </select>
       </div>
     </div>
@@ -594,7 +650,7 @@ const I18N={
     goal:'目标',goalText:'清除所有安全格！',
     hint:'提示',peek:'透视',safeDig:'安全挖',
     reset:'重置',play:'开始',pause:'暂停',resume:'继续',
-    lv1:'1 入门',lv2:'2 初级',lv3:'3 中级',lv4:'4 高级',lv5:'5 专家',
+    lv1:'1 入门',lv2:'2 初级',lv3:'3 中级',lv4:'4 高级',lv5:'5 专家',lv6:'6 挑战',lv7:'7 极难',lv8:'8 史诗',lv9:'9 传奇',lv10:'10 神话',
     idle:['点击方格\n开始！🌟','找出炸弹！💣','加油！🦁','出发！🚀'],
     good:['做得好！🎉','你真棒！💖','继续！⭐','太聪明了！🧠','棒棒哒！🌈'],
     warn:['小心！⚠️','注意！👀','快到了！💪','集中精神！🎯'],
@@ -605,8 +661,12 @@ const I18N={
     playAgain:'再玩一次！',scoreLabel:'得分：',bestLabel:'最高纪录：',newBest:'🎉 新纪录！',bestChip:'最佳',
     achUnlock:'成就解锁',
     mapTitle:'选择关卡',mapSub:'完成关卡解锁下一个地点！',mapBtn:'返回地图',
+    dailyBtn:'每日挑战',statsBtn:'统计',
     specialStar:'⭐ 幸运星！+50分奖励！',specialChest:'💎 宝箱！获得一个提示！',specialBoost:'⚡ 加速！计时暂停5秒！',
     catPhrases:['加油！你一定行的！','仔细想想，答案就在眼前！','好棒！继续保持！','没关系，再试一次！','你是最厉害的小探险家！','相信自己！','慢慢来，不着急～','耶！离胜利不远了！'],
+    dailyTitle:'每日挑战',dailySub:'每天一局，坚持就是胜利！',dailyDone:'今日已完成！明天再来！',
+    statsTitle:'游戏统计',statsClose:'关闭',
+    statPlayed:'已玩局数',statWon:'胜利局数',statWinRate:'胜率',statBestTimes:'各关最佳用时',statAch:'成就解锁',
     ach:{
       firstSteps:{e:'🌟',n:'初次探险！'},
       lightning: {e:'⚡',n:'闪电速度！'},
@@ -614,6 +674,12 @@ const I18N={
       ironHeart: {e:'🛡️',n:'铁血战士！'},
       threeStars:{e:'💎',n:'完美三星！'},
       flagPro:   {e:'🚩',n:'插旗达人！'},
+      veteran:   {e:'🎖️',n:'老兵勋章！'},
+      noHints:   {e:'🧠',n:'不靠外力！'},
+      dailyHero: {e:'📅',n:'每日英雄！'},
+      explorer:  {e:'🗺️',n:'全图探险家！'},
+      speedster: {e:'🚀',n:'极速闪过！'},
+      collector: {e:'🎁',n:'收藏家！'},
     }
   },
   en:{
@@ -621,7 +687,7 @@ const I18N={
     goal:'GOAL',goalText:'Clear all safe tiles!',
     hint:'HINT',peek:'PEEK',safeDig:'SAFE DIG',
     reset:'RESET',play:'PLAY',pause:'PAUSE',resume:'RESUME',
-    lv1:'1 Starter',lv2:'2 Easy',lv3:'3 Medium',lv4:'4 Hard',lv5:'5 Expert',
+    lv1:'1 Starter',lv2:'2 Easy',lv3:'3 Medium',lv4:'4 Hard',lv5:'5 Expert',lv6:'6 Challenge',lv7:'7 Brutal',lv8:'8 Epic',lv9:'9 Legend',lv10:'10 Myth',
     idle:['Click a tile\nto start! 🌟','Find the\nbombs! 💣','Be brave! 🦁',"Let's go! 🚀"],
     good:['Great job! 🎉',"You're doing\namazing! 💖",'Keep going! ⭐','So smart! 🧠','Awesome! 🌈'],
     warn:['Be careful! ⚠️','Watch out! 👀','Almost there! 💪','Stay focused! 🎯'],
@@ -632,8 +698,12 @@ const I18N={
     playAgain:'Play Again!',scoreLabel:'Score: ',bestLabel:'Best: ',newBest:'🎉 New Record!',bestChip:'Best',
     achUnlock:'Achievement Unlocked',
     mapTitle:'Choose Level',mapSub:'Complete a level to unlock the next!',mapBtn:'Back to Map',
+    dailyBtn:'Daily',statsBtn:'Stats',
     specialStar:'⭐ Lucky Star! +50 bonus!',specialChest:'💎 Treasure! Got a hint!',specialBoost:'⚡ Boost! Timer paused 5s!',
     catPhrases:['You can do it!','Think carefully, the answer is close!','Great job, keep it up!','No worries, try again!','You are the greatest explorer!','Believe in yourself!','Take your time~','Woohoo! Victory is near!'],
+    dailyTitle:'Daily Challenge',dailySub:'One puzzle per day — can you beat it?',dailyDone:"Today's done! Come back tomorrow!",
+    statsTitle:'Statistics',statsClose:'Close',
+    statPlayed:'Games Played',statWon:'Wins',statWinRate:'Win Rate',statBestTimes:'Best Times',statAch:'Achievements',
     ach:{
       firstSteps:{e:'🌟',n:'First Steps!'},
       lightning: {e:'⚡',n:'Lightning!'},
@@ -641,6 +711,12 @@ const I18N={
       ironHeart: {e:'🛡️',n:'Iron Heart!'},
       threeStars:{e:'💎',n:'Three Stars!'},
       flagPro:   {e:'🚩',n:'Flag Pro!'},
+      veteran:   {e:'🎖️',n:'Veteran!'},
+      noHints:   {e:'🧠',n:'No Hints!'},
+      dailyHero: {e:'📅',n:'Daily Hero!'},
+      explorer:  {e:'🗺️',n:'Full Explorer!'},
+      speedster: {e:'🚀',n:'Speedster!'},
+      collector: {e:'🎁',n:'Collector!'},
     }
   }
 };
@@ -670,14 +746,30 @@ const MAP_SCENES=[
   `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="sn_sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1A237E"/><stop offset="60%" stop-color="#5C6BC0"/><stop offset="100%" stop-color="#90CAF9"/></linearGradient><linearGradient id="sn_mt" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#B0BEC5"/><stop offset="100%" stop-color="#546E7A"/></linearGradient><linearGradient id="sn_sw" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#ECEFF1"/><stop offset="100%" stop-color="#B0BEC5"/></linearGradient><linearGradient id="sn_gd" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E3F2FD"/><stop offset="100%" stop-color="#90CAF9"/></linearGradient><clipPath id="sn_c"><circle cx="48" cy="48" r="47"/></clipPath></defs><g clip-path="url(#sn_c)"><rect width="96" height="96" fill="url(#sn_sky)"/><path d="M0 30 Q24 20 48 28 Q72 36 96 22" stroke="#80DEEA" stroke-width="4" fill="none" opacity=".3" stroke-linecap="round"/><path d="M0 36 Q24 26 48 34 Q72 42 96 28" stroke="#B39DDB" stroke-width="3" fill="none" opacity=".22" stroke-linecap="round"/><circle cx="14" cy="12" r="1.5" fill="white" opacity=".9"/><circle cx="30" cy="8" r="1" fill="white" opacity=".8"/><circle cx="78" cy="10" r="1.8" fill="#FFF9C4" opacity=".9"/><circle cx="88" cy="24" r="1.2" fill="white" opacity=".7"/><circle cx="60" cy="6" r="1" fill="white" opacity=".8"/><circle cx="8" cy="26" r="1" fill="#FFF9C4" opacity=".6"/><polygon points="20,72 56,16 92,72" fill="#455A64" opacity=".55"/><polygon points="48,14 8,78 88,78" fill="url(#sn_mt)"/><polygon points="48,14 30,52 66,52" fill="#78909C" opacity=".35"/><polygon points="48,14 28,54 68,54" fill="url(#sn_sw)"/><polygon points="48,14 40,36 56,36" fill="white" opacity=".65"/><path d="M32 48 Q38 44 44 48" stroke="#B0BEC5" stroke-width="1" fill="none" opacity=".6"/><path d="M52 44 Q58 40 64 44" stroke="#B0BEC5" stroke-width="1" fill="none" opacity=".5"/><ellipse cx="48" cy="84" rx="58" ry="18" fill="url(#sn_gd)"/><rect x="14" y="70" width="4" height="12" rx="1" fill="#37474F"/><polygon points="16,52 8,72 24,72" fill="#2E7D32"/><polygon points="16,58 9,74 23,74" fill="#388E3C"/><rect x="76" y="70" width="4" height="12" rx="1" fill="#37474F"/><polygon points="78,54 70,72 86,72" fill="#1B5E20"/><polygon points="78,60 71,74 85,74" fill="#2E7D32"/><circle cx="32" cy="34" r="1.8" fill="white" opacity=".9"/><circle cx="60" cy="42" r="1.4" fill="white" opacity=".8"/><circle cx="20" cy="56" r="1.2" fill="white" opacity=".7"/><circle cx="72" cy="36" r="1.6" fill="white" opacity=".85"/><circle cx="44" cy="66" r="1" fill="white" opacity=".9"/><circle cx="76" cy="16" r="8" fill="#FFF9C4" opacity=".9"/><circle cx="79" cy="14" r="6" fill="#5C6BC0" opacity=".9"/></g><circle cx="48" cy="48" r="47" fill="none" stroke="#5C6BC0" stroke-width="2.5" opacity=".4"/></svg>`,
   /* 🚀 太空 */
   `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="sp_bg" cx="50%" cy="50%" r="70%"><stop offset="0%" stop-color="#1a1a4e"/><stop offset="100%" stop-color="#050510"/></radialGradient><radialGradient id="sp_nb" cx="30%" cy="60%" r="60%"><stop offset="0%" stop-color="#7B1FA2" stop-opacity=".5"/><stop offset="100%" stop-color="#7B1FA2" stop-opacity="0"/></radialGradient><radialGradient id="sp_pl" cx="35%" cy="35%" r="65%"><stop offset="0%" stop-color="#80DEEA"/><stop offset="100%" stop-color="#0277BD"/></radialGradient><radialGradient id="sp_fl" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFD54F" stop-opacity=".9"/><stop offset="100%" stop-color="#FF6F00" stop-opacity="0"/></radialGradient><filter id="sp_bl"><feGaussianBlur stdDeviation="2.5"/></filter><clipPath id="sp_c"><circle cx="48" cy="48" r="47"/></clipPath></defs><g clip-path="url(#sp_c)"><rect width="96" height="96" fill="url(#sp_bg)"/><ellipse cx="30" cy="60" rx="36" ry="28" fill="url(#sp_nb)" filter="url(#sp_bl)"/><ellipse cx="70" cy="30" rx="22" ry="18" fill="#1565C0" opacity=".22" filter="url(#sp_bl)"/><circle cx="8" cy="10" r="1.5" fill="white" opacity=".9"/><circle cx="18" cy="6" r="1" fill="#FFF9C4" opacity=".8"/><circle cx="30" cy="14" r="2" fill="white" opacity=".95"/><circle cx="45" cy="8" r="1.2" fill="white" opacity=".7"/><circle cx="60" cy="12" r="1.5" fill="#FFF9C4" opacity=".85"/><circle cx="76" cy="6" r="1" fill="white" opacity=".8"/><circle cx="86" cy="18" r="1.8" fill="white" opacity=".9"/><circle cx="6" cy="30" r="1.2" fill="#FFF9C4" opacity=".7"/><circle cx="88" cy="44" r="1" fill="white" opacity=".75"/><circle cx="14" cy="52" r="1.5" fill="white" opacity=".6"/><circle cx="80" cy="58" r="1.2" fill="#FFF9C4" opacity=".7"/><circle cx="90" cy="72" r="1" fill="white" opacity=".8"/><circle cx="10" cy="80" r="1.3" fill="white" opacity=".6"/><circle cx="84" cy="86" r="1.5" fill="#FFF9C4" opacity=".7"/><circle cx="22" cy="36" r="2.5" fill="white" opacity=".9"/><circle cx="22" cy="36" r="5" fill="white" opacity=".15" filter="url(#sp_bl)"/><circle cx="72" cy="62" r="16" fill="url(#sp_pl)"/><ellipse cx="72" cy="60" rx="15" ry="4" fill="#4FC3F7" opacity=".4"/><ellipse cx="72" cy="65" rx="14" ry="3" fill="#0288D1" opacity=".3"/><ellipse cx="66" cy="56" rx="6" ry="4" fill="white" opacity=".25"/><ellipse cx="72" cy="62" rx="28" ry="7" fill="none" stroke="#B0BEC5" stroke-width="3" opacity=".5"/><ellipse cx="72" cy="62" rx="28" ry="7" fill="none" stroke="#90CAF9" stroke-width="1.5" opacity=".35"/><path d="M44 62 Q58 56 72 62 Q86 56 100 62" fill="#050510" opacity=".6"/><rect x="28" y="36" width="12" height="28" rx="6" fill="#ECEFF1"/><path d="M28 36 Q34 18 40 36Z" fill="#F44336"/><circle cx="34" cy="46" r="4" fill="#B3E5FC" stroke="#78909C" stroke-width="1.5"/><circle cx="33" cy="45" r="1.5" fill="white" opacity=".6"/><polygon points="28,58 22,70 28,65" fill="#F44336"/><polygon points="40,58 46,70 40,65" fill="#F44336"/><ellipse cx="34" cy="70" rx="5" ry="3" fill="url(#sp_fl)" filter="url(#sp_bl)"/><ellipse cx="34" cy="73" rx="3" ry="8" fill="#FF6F00" opacity=".85"/><ellipse cx="34" cy="73" rx="2" ry="6" fill="#FFD54F" opacity=".9"/><rect x="28" y="50" width="12" height="4" rx="2" fill="#1565C0" opacity=".65"/><circle cx="20" cy="44" r="1" fill="#FFF9C4" opacity=".8"/><circle cx="48" cy="38" r="1.2" fill="#FFF9C4" opacity=".7"/></g><circle cx="48" cy="48" r="47" fill="none" stroke="#5C6BC0" stroke-width="2.5" opacity=".35"/></svg>`,
+  /* 🌋 火山 */
+  `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="vl_sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#1a0a00"/><stop offset="50%" stop-color="#7B1700"/><stop offset="100%" stop-color="#D84315"/></linearGradient><radialGradient id="vl_glow" cx="50%" cy="100%" r="70%"><stop offset="0%" stop-color="#FF6D00" stop-opacity=".8"/><stop offset="100%" stop-color="#FF6D00" stop-opacity="0"/></radialGradient><linearGradient id="vl_lava" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FF6D00"/><stop offset="100%" stop-color="#BF360C"/></linearGradient><linearGradient id="vl_rock" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#4E342E"/><stop offset="100%" stop-color="#212121"/></linearGradient><filter id="vl_bl"><feGaussianBlur stdDeviation="3"/></filter><clipPath id="vl_c"><circle cx="48" cy="48" r="47"/></clipPath></defs><g clip-path="url(#vl_c)"><rect width="96" height="96" fill="url(#vl_sky)"/><ellipse cx="48" cy="96" rx="60" ry="30" fill="url(#vl_glow)" filter="url(#vl_bl)"/><circle cx="12" cy="18" r="1.5" fill="#FF8A65" opacity=".8"/><circle cx="28" cy="10" r="1" fill="#FFAB40" opacity=".7"/><circle cx="72" cy="14" r="1.8" fill="#FF8A65" opacity=".85"/><circle cx="84" cy="8" r="1.2" fill="white" opacity=".5"/><circle cx="50" cy="6" r="1" fill="white" opacity=".6"/><polygon points="0,96 20,44 40,96" fill="url(#vl_rock)" opacity=".7"/><polygon points="60,96 80,38 96,96" fill="url(#vl_rock)" opacity=".6"/><polygon points="14,96 48,14 82,96" fill="url(#vl_rock)"/><polygon points="34,96 48,14 62,96" fill="#3E2723"/><path d="M40 14 Q48 2 56 14 Q58 22 48 28 Q38 22 40 14Z" fill="#FF6D00"/><path d="M43 10 Q48 4 53 10 Q55 18 48 22 Q41 18 43 10Z" fill="#FFAB40"/><path d="M46 8 Q48 6 50 8 Q51 12 48 14 Q45 12 46 8Z" fill="#FFF9C4"/><path d="M36 14 Q42 18 40 30 Q46 36 48 28" stroke="#FF6D00" stroke-width="3" fill="none" stroke-linecap="round" opacity=".7"/><path d="M60 14 Q54 20 56 32 Q50 36 48 28" stroke="#FF8A65" stroke-width="2.5" fill="none" stroke-linecap="round" opacity=".6"/><path d="M0 80 Q14 72 28 78 Q42 84 48 76 Q54 68 68 74 Q82 80 96 72 L96 96 L0 96Z" fill="url(#vl_lava)"/><path d="M0 86 Q16 80 30 86 Q44 92 56 84 Q70 76 84 84 L96 82 L96 96 L0 96Z" fill="#FF3D00" opacity=".7"/><circle cx="20" cy="82" r="3" fill="#FFAB40" opacity=".9"/><circle cx="60" cy="80" r="2.5" fill="#FF8A65" opacity=".8"/><circle cx="76" cy="85" r="2" fill="#FFAB40" opacity=".75"/></g><circle cx="48" cy="48" r="47" fill="none" stroke="#BF360C" stroke-width="2.5" opacity=".5"/></svg>`,
+  /* 🏔️ 极地 */
+  `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ar_sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#0D0221"/><stop offset="50%" stop-color="#0A1628"/><stop offset="100%" stop-color="#0D3B5E"/></linearGradient><linearGradient id="ar_ice" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E3F2FD"/><stop offset="100%" stop-color="#90CAF9"/></linearGradient><linearGradient id="ar_au1" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#00E676" stop-opacity=".7"/><stop offset="100%" stop-color="#00BCD4" stop-opacity="0"/></linearGradient><linearGradient id="ar_au2" x1="1" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#E040FB" stop-opacity=".6"/><stop offset="100%" stop-color="#7C4DFF" stop-opacity="0"/></linearGradient><filter id="ar_bl"><feGaussianBlur stdDeviation="2"/></filter><clipPath id="ar_c"><circle cx="48" cy="48" r="47"/></clipPath></defs><g clip-path="url(#ar_c)"><rect width="96" height="96" fill="url(#ar_sky)"/><ellipse cx="30" cy="30" rx="50" ry="28" fill="url(#ar_au1)" filter="url(#ar_bl)" opacity=".8"/><ellipse cx="70" cy="22" rx="40" ry="20" fill="url(#ar_au2)" filter="url(#ar_bl)" opacity=".7"/><path d="M0 28 Q24 20 48 32 Q72 44 96 24" stroke="#00E676" stroke-width="5" fill="none" opacity=".35" stroke-linecap="round" filter="url(#ar_bl)"/><path d="M0 36 Q24 26 48 40 Q72 54 96 32" stroke="#7C4DFF" stroke-width="4" fill="none" opacity=".3" stroke-linecap="round" filter="url(#ar_bl)"/><path d="M0 44 Q30 34 56 48 Q74 56 96 40" stroke="#00BCD4" stroke-width="3" fill="none" opacity=".25" stroke-linecap="round" filter="url(#ar_bl)"/><circle cx="8" cy="10" r="1.5" fill="white" opacity=".9"/><circle cx="22" cy="6" r="1" fill="#E1F5FE" opacity=".8"/><circle cx="40" cy="4" r="1.8" fill="white" opacity=".95"/><circle cx="62" cy="8" r="1.2" fill="#E1F5FE" opacity=".7"/><circle cx="80" cy="4" r="1.5" fill="white" opacity=".85"/><circle cx="90" cy="16" r="1" fill="white" opacity=".8"/><ellipse cx="48" cy="92" rx="58" ry="22" fill="url(#ar_ice)"/><polygon points="6,80 30,44 54,80" fill="#B0BEC5" opacity=".6"/><polygon points="50,80 74,38 98,80" fill="#90A4AE" opacity=".55"/><polygon points="22,80 48,32 74,80" fill="#ECEFF1"/><polygon points="36,80 48,32 60,80" fill="white" opacity=".8"/><polygon points="36,80 48,32 54,60 42,60" fill="#B0BEC5" opacity=".4"/><ellipse cx="30" cy="82" rx="12" ry="5" fill="white" opacity=".7"/><ellipse cx="68" cy="84" rx="10" ry="4" fill="white" opacity=".65"/><circle cx="10" cy="72" r="3" fill="white" opacity=".5"/><circle cx="76" cy="68" r="2.5" fill="white" opacity=".45"/></g><circle cx="48" cy="48" r="47" fill="none" stroke="#0288D1" stroke-width="2.5" opacity=".45"/></svg>`,
+  /* 🍭 糖果岛 */
+  `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="cd_sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FCE4EC"/><stop offset="100%" stop-color="#F8BBD9"/></linearGradient><linearGradient id="cd_gnd" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F48FB1"/><stop offset="100%" stop-color="#E91E8C"/></linearGradient><radialGradient id="cd_sun" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFFDE7"/><stop offset="70%" stop-color="#FFF176"/><stop offset="100%" stop-color="#FFF176" stop-opacity="0"/></radialGradient><filter id="cd_sh"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#AD1457" flood-opacity=".25"/></filter><clipPath id="cd_c"><circle cx="48" cy="48" r="47"/></clipPath></defs><g clip-path="url(#cd_c)"><rect width="96" height="96" fill="url(#cd_sky)"/><circle cx="20" cy="16" r="14" fill="url(#cd_sun)" opacity=".9"/><circle cx="20" cy="16" r="7" fill="#FFFDE7"/><path d="M0 58 Q16 50 32 58 Q48 66 64 54 Q80 42 96 50" stroke="#F48FB1" stroke-width="10" fill="none" opacity=".5" stroke-linecap="round"/><path d="M0 62 Q16 54 32 62 Q48 70 64 58 Q80 46 96 54" stroke="#CE93D8" stroke-width="8" fill="none" opacity=".45" stroke-linecap="round"/><path d="M0 66 Q20 58 40 66 Q60 74 80 62 Q90 56 96 60" stroke="#80DEEA" stroke-width="6" fill="none" opacity=".4" stroke-linecap="round"/><ellipse cx="48" cy="92" rx="56" ry="22" fill="url(#cd_gnd)"/><rect x="18" y="48" width="7" height="36" rx="3" fill="white" filter="url(#cd_sh)"/><path d="M18 48 Q21.5 40 25 48 Q21.5 44 18 48Z" fill="#F44336"/><path d="M18 56 L25 56" stroke="#F44336" stroke-width="3" stroke-linecap="round"/><path d="M18 64 L25 64" stroke="#F44336" stroke-width="3" stroke-linecap="round"/><path d="M18 72 L25 72" stroke="#F44336" stroke-width="3" stroke-linecap="round"/><circle cx="18" cy="48" r="8" fill="#E91E63" filter="url(#cd_sh)"/><circle cx="18" cy="48" r="6" fill="#F48FB1"/><path d="M18 42 L18 44 M13 48 L15 48 M23 48 L21 48 M18 54 L18 52" stroke="#E91E63" stroke-width="1.5" stroke-linecap="round"/><rect x="67" y="52" width="7" height="32" rx="3" fill="white" filter="url(#cd_sh)"/><path d="M67 52 Q70.5 44 74 52 Q70.5 48 67 52Z" fill="#9C27B0"/><path d="M67 60 L74 60" stroke="#9C27B0" stroke-width="3" stroke-linecap="round"/><path d="M67 68 L74 68" stroke="#9C27B0" stroke-width="3" stroke-linecap="round"/><circle cx="71" cy="76" r="5" fill="#CE93D8"/><circle cx="40" cy="82" r="4" fill="#FFF176" stroke="#FDD835" stroke-width="1.5"/><circle cx="56" cy="80" r="3.5" fill="#80DEEA" stroke="#26C6DA" stroke-width="1.5"/><circle cx="32" cy="84" r="3" fill="#FFAB40" stroke="#FF8F00" stroke-width="1.5"/><ellipse cx="50" cy="30" rx="15" ry="8" fill="white" opacity=".8"/><ellipse cx="40" cy="26" rx="10" ry="7" fill="white" opacity=".8"/><ellipse cx="62" cy="28" rx="9" ry="6" fill="white" opacity=".75"/></g><circle cx="48" cy="48" r="47" fill="none" stroke="#E91E63" stroke-width="2.5" opacity=".45"/></svg>`,
+  /* 🏛️ 古城 */
+  `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="ac_sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FF8F00"/><stop offset="50%" stop-color="#FFB300"/><stop offset="100%" stop-color="#FFF8E1"/></linearGradient><linearGradient id="ac_sand" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#FFD54F"/><stop offset="100%" stop-color="#FF8F00"/></linearGradient><linearGradient id="ac_col" x1="0" y1="0" x2="1" y2="0"><stop offset="0%" stop-color="#BCAAA4"/><stop offset="100%" stop-color="#EFEBE9"/></linearGradient><radialGradient id="ac_sun" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFFDE7"/><stop offset="60%" stop-color="#FFD54F"/><stop offset="100%" stop-color="#FFD54F" stop-opacity="0"/></radialGradient><filter id="ac_sh"><feDropShadow dx="2" dy="3" stdDeviation="2" flood-color="#5D4037" flood-opacity=".3"/></filter><clipPath id="ac_c"><circle cx="48" cy="48" r="47"/></clipPath></defs><g clip-path="url(#ac_c)"><rect width="96" height="96" fill="url(#ac_sky)"/><circle cx="76" cy="16" r="18" fill="url(#ac_sun)" opacity=".9"/><circle cx="76" cy="16" r="9" fill="#FFFDE7"/><path d="M0 74 Q48 58 96 66 L96 96 L0 96Z" fill="url(#ac_sand)"/><polygon points="30,72 38,48 46,72" fill="#BCAAA4" filter="url(#ac_sh)"/><polygon points="30,48 38,38 46,48" fill="#EFEBE9" filter="url(#ac_sh)"/><rect x="32" y="44" width="12" height="2" fill="#BCAAA4"/><polygon points="50,72 58,44 66,72" fill="#A1887F" filter="url(#ac_sh)"/><polygon points="50,44 58,34 66,44" fill="#D7CCC8" filter="url(#ac_sh)"/><rect x="52" y="40" width="12" height="2" fill="#A1887F"/><rect x="28" y="70" width="20" height="4" rx="1" fill="#8D6E63"/><rect x="48" y="70" width="20" height="4" rx="1" fill="#795548"/><rect x="26" y="68" width="46" height="3" rx="1" fill="#6D4C41"/><rect x="12" y="58" width="6" height="14" rx="2" fill="#A1887F"/><rect x="78" y="56" width="6" height="16" rx="2" fill="#8D6E63"/><path d="M6 96 Q8 82 12 74 Q16 68 14 60" stroke="#2E7D32" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M6 75 L14 72" stroke="#388E3C" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M8 68 L14 66" stroke="#43A047" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M90 96 Q88 80 84 72 Q80 66 82 58" stroke="#2E7D32" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M90 75 L82 72" stroke="#388E3C" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="48" cy="30" r="6" fill="#FFD54F" stroke="#FF8F00" stroke-width="1.5"/><circle cx="48" cy="30" r="3" fill="#FF8F00"/><ellipse cx="22" cy="26" rx="14" ry="8" fill="white" opacity=".7"/><ellipse cx="32" cy="22" rx="10" ry="7" fill="white" opacity=".65"/></g><circle cx="48" cy="48" r="47" fill="none" stroke="#F57F17" stroke-width="2.5" opacity=".45"/></svg>`,
+  /* 🌈 彩虹岛 */
+  `<svg viewBox="0 0 96 96" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="rb_sky" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#64B5F6"/><stop offset="100%" stop-color="#B3E5FC"/></linearGradient><linearGradient id="rb_gnd" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#A5D6A7"/><stop offset="100%" stop-color="#388E3C"/></linearGradient><radialGradient id="rb_sun" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#FFFDE7"/><stop offset="60%" stop-color="#FFD54F"/><stop offset="100%" stop-color="#FFD54F" stop-opacity="0"/></radialGradient><filter id="rb_sh"><feDropShadow dx="0" dy="2" stdDeviation="2" flood-color="#1B5E20" flood-opacity=".2"/></filter><clipPath id="rb_c"><circle cx="48" cy="48" r="47"/></clipPath></defs><g clip-path="url(#rb_c)"><rect width="96" height="96" fill="url(#rb_sky)"/><circle cx="78" cy="18" r="18" fill="url(#rb_sun)" opacity=".9"/><circle cx="78" cy="18" r="9" fill="#FFFDE7"/><path d="M4 72 Q48 20 92 72" stroke="#EF5350" stroke-width="5" fill="none" opacity=".85" stroke-linecap="round"/><path d="M8 74 Q48 25 88 74" stroke="#FF7043" stroke-width="5" fill="none" opacity=".8" stroke-linecap="round"/><path d="M12 76 Q48 30 84 76" stroke="#FFD600" stroke-width="5" fill="none" opacity=".8" stroke-linecap="round"/><path d="M16 78 Q48 35 80 78" stroke="#66BB6A" stroke-width="5" fill="none" opacity=".8" stroke-linecap="round"/><path d="M20 80 Q48 40 76 80" stroke="#42A5F5" stroke-width="5" fill="none" opacity=".8" stroke-linecap="round"/><path d="M24 82 Q48 45 72 82" stroke="#7E57C2" stroke-width="5" fill="none" opacity=".75" stroke-linecap="round"/><ellipse cx="48" cy="92" rx="56" ry="22" fill="url(#rb_gnd)"/><ellipse cx="22" cy="26" rx="16" ry="9" fill="white" opacity=".9"/><ellipse cx="14" cy="22" rx="10" ry="8" fill="white" opacity=".85"/><ellipse cx="30" cy="20" rx="10" ry="8" fill="white" opacity=".85"/><ellipse cx="22" cy="18" rx="8" ry="7" fill="white" opacity=".8"/><rect x="20" y="74" width="6" height="18" rx="3" fill="#5D4037"/><polygon points="23,46 12,74 34,74" fill="#2E7D32" filter="url(#rb_sh)"/><polygon points="23,55 13,76 33,76" fill="#43A047"/><rect x="66" y="76" width="5" height="16" rx="2.5" fill="#5D4037"/><polygon points="68,50 58,76 78,76" fill="#1B5E20" filter="url(#rb_sh)"/><polygon points="68,59 59,78 77,78" fill="#388E3C"/><circle cx="38" cy="84" r="2.5" fill="#FFCC02"/><circle cx="55" cy="82" r="2" fill="#FF8A65"/><circle cx="46" cy="86" r="1.8" fill="#F48FB1"/></g><circle cx="48" cy="48" r="47" fill="none" stroke="#42A5F5" stroke-width="2.5" opacity=".45"/></svg>`,
 ];
 
 function renderMapScreen(){
   const unlocked=getUnlockedLevel();
-  const names={zh:['🌲 森林','🏜️ 沙漠','🌊 海洋','⛰️ 雪山','🚀 太空'],en:['🌲 Forest','🏜️ Desert','🌊 Ocean','⛰️ Snow','🚀 Space']};
-  const diffs={zh:['入门·6×6','初级·8×8','中级·9×9','高级·10×10','专家·10×10'],en:['Starter·6×6','Easy·8×8','Medium·9×9','Hard·10×10','Expert·10×10']};
+  const names={
+    zh:['🌲 森林','🏜️ 沙漠','🌊 海洋','⛰️ 雪山','🚀 太空','🌋 火山','🏔️ 极地','🍭 糖果岛','🏛️ 古城','🌈 彩虹岛'],
+    en:['🌲 Forest','🏜️ Desert','🌊 Ocean','⛰️ Snow','🚀 Space','🌋 Volcano','🏔️ Arctic','🍭 Candy','🏛️ Ancient','🌈 Rainbow']
+  };
+  const diffs={
+    zh:['入门·6×6','初级·8×8','中级·9×9','高级·10×10','专家·10×10','挑战·11×11','极难·11×11','史诗·12×12','传奇·12×12','神话·13×13'],
+    en:['Starter·6×6','Easy·8×8','Medium·9×9','Hard·10×10','Expert·10×10','Chall·11×11','Brutal·11×11','Epic·12×12','Legend·12×12','Myth·13×13']
+  };
   const container=document.getElementById('mapCards');if(!container)return;
-  container.innerHTML=[1,2,3,4,5].map(lv=>{
+  container.innerHTML=Array.from({length:10},(_,i)=>i+1).map(lv=>{
     const locked=lv>unlocked;
     const s=getStars(lv);
     const starStr=s>0?'⭐'.repeat(s)+'☆'.repeat(3-s):'☆☆☆';
@@ -767,8 +859,8 @@ const getBest=lv=>parseInt(localStorage.getItem(`best-${lv}`)||'0');
 function setBest(lv,score){if(score>getBest(lv)){localStorage.setItem(`best-${lv}`,score);return true;}return false;}
 function renderBestBar(){
   const bar=document.getElementById('bestBar');
-  const names={zh:['入门','初级','中级','高级','专家'],en:['Starter','Easy','Medium','Hard','Expert']};
-  bar.innerHTML=[1,2,3,4,5].map(lv=>{const b=getBest(lv);return b>0?`<div class="best-chip"><span class="bc-lbl">${names[lang][lv-1]} ${t('bestChip')}</span>${b.toLocaleString()}</div>`:''}).join('');
+  const names={zh:['入门','初级','中级','高级','专家','挑战','极难','史诗','传奇','神话'],en:['Starter','Easy','Medium','Hard','Expert','Chall','Brutal','Epic','Legend','Myth']};
+  bar.innerHTML=Array.from({length:10},(_,i)=>i+1).map(lv=>{const b=getBest(lv);return b>0?`<div class="best-chip"><span class="bc-lbl">${names[lang][lv-1]} ${t('bestChip')}</span>${b.toLocaleString()}</div>`:''}).join('');
 }
 
 // ─── Achievements ─────────────────────────────────────────────────────────────
@@ -786,6 +878,14 @@ function unlockAch(key){
   setTimeout(()=>pop.classList.remove('show'),3200);
 }
 function checkAchievements(won,stars){
+  // Track games played/won
+  const played=parseInt(localStorage.getItem('stat-played')||'0')+1;
+  localStorage.setItem('stat-played',played);
+  if(won){
+    const wonCount=parseInt(localStorage.getItem('stat-won')||'0')+1;
+    localStorage.setItem('stat-won',wonCount);
+    if(wonCount>=20)unlockAch('veteran');
+  }
   if(!won)return;
   if(state.elapsed<30)unlockAch('lightning');
   if(state.bestCombo>=6)unlockAch('comboKing');
@@ -795,15 +895,124 @@ function checkAchievements(won,stars){
   let correctFlags=0;
   for(let r=0;r<state.size;r++)for(let c=0;c<state.size;c++)if(state.flagged[r][c]&&state.board[r][c]===-1)correctFlags++;
   if(correctFlags>=5)unlockAch('flagPro');
+  // no hints used
+  if(state.hints===3&&state.peeks===3&&state.safeDigs===3)unlockAch('noHints');
+  // speedster: win level 5+ in under 60s
+  if(state.level>=5&&state.elapsed<60)unlockAch('speedster');
+  // explorer: all 10 levels completed
+  const allDone=Array.from({length:10},(_,i)=>i+1).every(lv=>getStars(lv)>0);
+  if(allDone)unlockAch('explorer');
+  // collector: collected all 3 special types in one game
+  if(state._collectedSpecials&&state._collectedSpecials.has('star')&&state._collectedSpecials.has('chest')&&state._collectedSpecials.has('boost'))unlockAch('collector');
 }
+
+// ─── Stats ─────────────────────────────────────────────────────────────────────
+function openStats(){
+  const modal=document.getElementById('statsModal');
+  document.getElementById('statsTitle').textContent=t('statsTitle');
+  document.getElementById('statsCloseBtn').textContent=t('statsClose');
+  const played=parseInt(localStorage.getItem('stat-played')||'0');
+  const won=parseInt(localStorage.getItem('stat-won')||'0');
+  const winPct=played>0?Math.round(won/played*100):0;
+  const achCount=getUnlocked().size;
+  const levelNames={zh:['入门','初级','中级','高级','专家','挑战','极难','史诗','传奇','神话'],en:['Start','Easy','Med','Hard','Exp','Chall','Brut','Epic','Leg','Myth']};
+  const bestRows=Array.from({length:10},(_,i)=>i+1)
+    .filter(lv=>getBest(lv)>0)
+    .map(lv=>`<div class="stats-best-row"><span>${levelNames[lang][lv-1]}</span><span>${getBest(lv).toLocaleString()} pts</span></div>`)
+    .join('')||`<div style="color:#C0B8E8;font-size:12px">${lang==='zh'?'暂无记录':'No records yet'}</div>`;
+  document.getElementById('statsGrid').innerHTML=`
+    <div class="stat-box"><div class="stat-box-val">${played}</div><div class="stat-box-lbl">${t('statPlayed')}</div></div>
+    <div class="stat-box"><div class="stat-box-val">${won}</div><div class="stat-box-lbl">${t('statWon')}</div></div>
+    <div class="stat-box"><div class="stat-box-val">${winPct}%</div><div class="stat-box-lbl">${t('statWinRate')}</div></div>
+    <div class="stat-box"><div class="stat-box-val">${achCount}/12</div><div class="stat-box-lbl">${t('statAch')}</div></div>
+    <div class="stats-best-times"><div class="stats-best-label">🏆 ${t('statBestTimes')}</div>${bestRows}</div>
+  `;
+  modal.classList.add('show');
+}
+function closeStats(){document.getElementById('statsModal').classList.remove('show');}
+
+// ─── Daily Challenge ────────────────────────────────────────────────────────────
+function getDailyKey(){const d=new Date();return `daily-${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;}
+function isDailyDone(){return !!localStorage.getItem(getDailyKey()+'-done');}
+function getDailyStreak(){
+  let streak=0,d=new Date();
+  while(true){
+    const k=`daily-${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}-done`;
+    if(!localStorage.getItem(k))break;
+    streak++;d.setDate(d.getDate()-1);
+  }
+  return streak;
+}
+// Seeded RNG (mulberry32)
+function seededRNG(seed){
+  return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+}
+function getDailySeed(){const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();}
+
+function openDailyModal(){
+  const modal=document.getElementById('dailyModal');
+  document.getElementById('dailyModalTitle').textContent=t('dailyTitle');
+  document.getElementById('dailyModalSub').textContent=t('dailySub');
+  if(isDailyDone()){
+    const streak=getDailyStreak();
+    document.getElementById('dailyModalContent').innerHTML=`<div class="daily-done-badge">🎉</div><div class="daily-done-text">${t('dailyDone')}</div><div class="daily-streak">${lang==='zh'?`连续 ${streak} 天完成！`:`${streak}-day streak!`}</div>`;
+    document.getElementById('dailyModalBtn').style.display='none';
+  }else{
+    const d=new Date();
+    const dateStr=lang==='zh'?`${d.getMonth()+1}月${d.getDate()}日`:`${d.toLocaleDateString('en',{month:'short',day:'numeric'})}`;
+    document.getElementById('dailyModalContent').innerHTML=`<div style="font-size:36px;margin:10px 0">📅</div><div style="font-family:'Fredoka One',cursive;font-size:18px;color:#3D2F7A;margin-bottom:6px">${dateStr}</div><div style="font-size:13px;font-weight:700;color:#7B6BAF">${lang==='zh'?'9×9 · 15颗地雷':'9×9 · 15 mines'}</div>`;
+    document.getElementById('dailyModalBtn').style.display='';
+    document.getElementById('dailyModalBtn').textContent=lang==='zh'?'🚀 开始挑战！':'🚀 Start Challenge!';
+  }
+  document.getElementById('dailyCloseBtn').textContent=lang==='zh'?'关闭':'Close';
+  modal.classList.add('show');
+}
+function closeDailyModal(){document.getElementById('dailyModal').classList.remove('show');}
+
+function startDailyChallenge(){
+  closeDailyModal();
+  state.level='daily';state.hints=3;state.peeks=3;state.safeDigs=3;
+  showGameScreen();
+  // init with daily config (9×9, 15 mines)
+  const cfg={size:9,mines:15};
+  Object.assign(state,{
+    size:cfg.size,mines:cfg.mines,
+    board:Array.from({length:cfg.size},()=>Array(cfg.size).fill(0)),
+    revealed:Array.from({length:cfg.size},()=>Array(cfg.size).fill(false)),
+    flagged:Array.from({length:cfg.size},()=>Array(cfg.size).fill(false)),
+    gameStarted:false,gameOver:false,won:false,firstClick:true,
+    score:0,elapsed:0,paused:false,
+    totalSafe:cfg.size*cfg.size-cfg.mines,revealedSafe:0,flagsLeft:cfg.mines,
+    lives:MAX_LIVES,mineHits:0,combo:0,bestCombo:0,
+    specials:Array.from({length:cfg.size},()=>Array(cfg.size).fill(null)),
+    boostActive:false,_dailyMode:true,
+  });
+  clearInterval(state.timerInterval);clearTimeout(state.comboTimer);
+  state.timerInterval=null;state.comboTimer=null;
+  resetIdleTimer();
+  renderGrid();updateUI();updateLivesUI();updatePowerupUI();setPlayBtn(false);
+  setSpeech(pick(t('idle')));updateStars();
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('comboBadge').classList.remove('show');
+  renderBestBar();
+  // Override levelSelect display
+  const sel=document.getElementById('levelSelect');
+  if(sel)sel.value=3;
+}
+
 
 // ─── Game config ──────────────────────────────────────────────────────────────
 const LEVELS={
-  1:{size:6, mines:4 },   // Starter:  6×6  4 mines
-  2:{size:8, mines:10},   // Easy:     8×8  10 mines
-  3:{size:9, mines:15},   // Medium:   9×9  15 mines
+  1:{size:6, mines:4 },   // Starter:  6×6   4 mines
+  2:{size:8, mines:10},   // Easy:     8×8   10 mines
+  3:{size:9, mines:15},   // Medium:   9×9   15 mines
   4:{size:10,mines:22},   // Hard:     10×10 22 mines
   5:{size:10,mines:30},   // Expert:   10×10 30 mines
+  6:{size:11,mines:28},   // Challenge:11×11 28 mines
+  7:{size:11,mines:34},   // Brutal:   11×11 34 mines
+  8:{size:12,mines:38},   // Epic:     12×12 38 mines
+  9:{size:12,mines:44},   // Legend:   12×12 44 mines
+  10:{size:13,mines:50},  // Myth:     13×13 50 mines
 };
 const MAX_LIVES=3;
 
@@ -830,7 +1039,7 @@ function initGame(){
     totalSafe:cfg.size*cfg.size-cfg.mines,revealedSafe:0,flagsLeft:cfg.mines,
     lives:MAX_LIVES,mineHits:0,combo:0,bestCombo:0,
     specials:Array.from({length:cfg.size},()=>Array(cfg.size).fill(null)),
-    boostActive:false,
+    boostActive:false,_collectedSpecials:new Set(),_dailyMode:false,
   });
   clearInterval(state.timerInterval);clearTimeout(state.comboTimer);
   state.timerInterval=null;state.comboTimer=null;
@@ -874,6 +1083,9 @@ function applySpecialGlow(){
 function triggerSpecial(r,c){
   const sp=state.specials[r]&&state.specials[r][c];if(!sp)return;
   state.specials[r][c]=null;
+  // Track for collector achievement
+  if(!state._collectedSpecials)state._collectedSpecials=new Set();
+  state._collectedSpecials.add(sp);
   const tile=getTileEl(r,c);
   if(tile){tile.classList.remove(`sp-${sp}`);tile.classList.add('special-pop');setTimeout(()=>tile.classList.remove('special-pop'),420);}
   // Floating icon
@@ -1045,12 +1257,14 @@ function endGame(won){
     setMascotMood('happy');
     setTurtleMood('happy');
     const stars=getStarCount();
-    if(state.level<5){setUnlockedLevel(state.level+1);state._justUnlocked=state.level+1;}
+    if(typeof state.level==='number'&&state.level<10){setUnlockedLevel(state.level+1);state._justUnlocked=state.level+1;}
+    if(state._dailyMode){localStorage.setItem(getDailyKey()+'-done','1');unlockAch('dailyHero');}
     setTimeout(()=>{checkAchievements(true,stars);showOverlay(true);},800);
   }else{
     revealAllMines();setSpeech('😅');
     setMascotMood('cry');
     setTurtleMood('scared',3000);
+    checkAchievements(false,0);
     setTimeout(()=>showOverlay(false),1200);
   }
   updateUI();setPlayBtn(false);
