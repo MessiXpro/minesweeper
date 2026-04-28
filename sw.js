@@ -1,4 +1,4 @@
-const CACHE = 'star-sweeper-v1';
+const CACHE = 'star-sweeper-v3';
 const ASSETS = [
   './',
   './index.html',
