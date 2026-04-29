@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>隐私政策 · Privacy Policy — 星星扫雷 Star Sweeper</title>
+  <style>
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;max-width:680px;margin:0 auto;padding:32px 20px 60px;color:#222;line-height:1.7;background:#fafafa;}
+    h1{font-size:26px;color:#3D2F7A;margin-bottom:4px;}
+    h2{font-size:17px;color:#3D2F7A;margin-top:32px;}
+    p,li{font-size:15px;color:#444;}
+    a{color:#7C3AED;}
+    .badge{display:inline-block;background:#f0ebff;border-radius:8px;padding:6px 14px;font-size:14px;color:#7C3AED;font-weight:600;margin-bottom:24px;}
+    hr{border:none;border-top:1px solid #e5e5e5;margin:32px 0;}
+    .lang-switch{float:right;font-size:14px;color:#7C3AED;cursor:pointer;text-decoration:underline;margin-top:6px;}
+    #zh{display:block}#en{display:none}
+  </style>
+</head>
+<body>
+<span class="lang-switch" onclick="toggleLang()">English ↓</span>
+
+<!-- ── 中文版 ── -->
+<div id="zh">
+  <h1>⭐ 星星扫雷 · 隐私政策</h1>
+  <div class="badge">最后更新：2026 年 5 月</div>
+
+  <p>星星扫雷（Star Sweeper）是一款面向儿童的益智游戏。我们非常重视用户隐私，特别是儿童用户的隐私保护。</p>
+
+  <h2>📦 我们收集的数据</h2>
+  <p><strong>我们不收集任何个人信息。</strong>游戏的所有数据（关卡进度、成就、最高分、游戏设置）仅存储在您的设备本地（使用浏览器 localStorage），绝不上传至任何服务器。</p>
+
+  <h2>🌐 网络请求</h2>
+  <ul>
+    <li>游戏字体通过 Google Fonts（fonts.googleapis.com）加载，这是谷歌的标准服务。</li>
+    <li>除此之外，游戏在安装后可完全离线运行，不发送任何用户数据至外部服务器。</li>
+  </ul>
+
+  <h2>🧒 儿童隐私</h2>
+  <p>本游戏适合全年龄段（包括儿童），不含广告、不含内购、不收集任何个人身份信息，符合 COPPA（美国儿童在线隐私保护法）的相关要求。</p>
+
+  <h2>🔒 数据安全</h2>
+  <p>由于所有数据均保存在设备本地，我们无法访问您的任何游戏数据。卸载应用或清除浏览器数据将会删除所有本地存储的游戏进度。</p>
+
+  <h2>📧 联系我们</h2>
+  <p>如您对隐私政策有任何疑问，请通过以下方式联系我们：<br>
+  📮 <a href="mailto:shuangyg@gmail.com">shuangyg@gmail.com</a></p>
+</div>
+
+<!-- ── English ── -->
+<div id="en">
+  <h1>⭐ Star Sweeper · Privacy Policy</h1>
+  <div class="badge">Last updated: May 2026</div>
+
+  <p>Star Sweeper (星星扫雷) is a puzzle game designed for children. We take user privacy seriously, especially for younger players.</p>
+
+  <h2>📦 Data We Collect</h2>
+  <p><strong>We do not collect any personal information.</strong> All game data (level progress, achievements, high scores, settings) is stored locally on your device using browser localStorage and is never transmitted to any server.</p>
+
+  <h2>🌐 Network Requests</h2>
+  <ul>
+    <li>Game fonts are loaded via Google Fonts (fonts.googleapis.com), a standard Google service.</li>
+    <li>After installation, the game runs fully offline and sends no user data to external servers.</li>
+  </ul>
+
+  <h2>🧒 Children's Privacy</h2>
+  <p>This game is suitable for all ages, including children. It contains no ads, no in-app purchases, and collects no personally identifiable information, in compliance with COPPA (Children's Online Privacy Protection Act).</p>
+
+  <h2>🔒 Data Security</h2>
+  <p>Since all data is stored locally on your device, we have no access to your game data. Uninstalling the app or clearing browser data will delete all locally stored game progress.</p>
+
+  <h2>📧 Contact Us</h2>
+  <p>If you have questions about this privacy policy, contact us at:<br>
+  📮 <a href="mailto:shuangyg@gmail.com">shuangyg@gmail.com</a></p>
+</div>
+
+<script>
+  function toggleLang(){
+    const zh=document.getElementById('zh'),en=document.getElementById('en');
+    const btn=document.querySelector('.lang-switch');
+    if(zh.style.display==='none'){zh.style.display='block';en.style.display='none';btn.textContent='English ↓';}
+    else{zh.style.display='none';en.style.display='block';btn.textContent='中文 ↓';}
+  }
+</script>
+</body>
+</html>

@@ -323,6 +323,14 @@
     .map-action-btn:hover{transform:translateY(-4px) scale(1.07);box-shadow:0 10px 28px rgba(40,20,100,0.38);}
     .map-daily-btn{border-color:rgba(255,220,80,0.7);background:rgba(255,200,40,0.25);}
     .map-stats-btn{border-color:rgba(140,200,255,0.7);background:rgba(80,160,255,0.2);}
+    .map-help-btn{border-color:rgba(180,255,180,0.7);background:rgba(80,220,120,0.2);}
+    /* ── Help / Tutorial Modal ── */
+    .help-steps{text-align:left;margin:10px 0 4px;max-height:52vh;overflow-y:auto;padding-right:4px;}
+    .help-steps::-webkit-scrollbar{width:4px}.help-steps::-webkit-scrollbar-thumb{background:rgba(124,58,237,.3);border-radius:4px}
+    .help-step{display:flex;align-items:flex-start;gap:12px;padding:10px 14px;margin-bottom:8px;background:linear-gradient(135deg,rgba(124,58,237,0.07),rgba(59,130,246,0.06));border-radius:16px;border:1.5px solid rgba(124,58,237,0.1);}
+    .help-step-icon{font-size:22px;flex-shrink:0;margin-top:1px;letter-spacing:-3px;}
+    .help-step-title{font-family:'Fredoka One',cursive;font-size:15px;color:#3D2F7A;margin-bottom:3px;}
+    .help-step-desc{font-size:13px;color:#5B5082;line-height:1.55;}
     /* ── Modal overlay ── */
     .modal-overlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(10,5,40,0.55);backdrop-filter:blur(4px);}
     .modal-overlay.show{display:flex;}
@@ -477,6 +485,15 @@
   </div>
 </div>
 
+<!-- ── Tutorial / Help Modal ── -->
+<div class="modal-overlay" id="helpModal" onclick="if(event.target===this)closeHelp()">
+  <div class="modal-card">
+    <h2 class="modal-title" id="helpTitle">怎么玩？</h2>
+    <div class="help-steps" id="helpSteps"></div>
+    <button class="modal-close-btn" onclick="closeHelp()" id="helpStartBtn">出发！🚀</button>
+  </div>
+</div>
+
 <!-- ── Map Screen ── -->
 <div id="map-screen" class="map-screen">
   <h1 class="map-title" data-i18n="mapTitle">选择关卡</h1>
@@ -484,8 +501,12 @@
   <div class="map-action-btns">
     <button class="map-action-btn map-daily-btn" onclick="openDailyModal()" id="mapDailyBtn">📅 <span data-i18n="dailyBtn">每日挑战</span></button>
     <button class="map-action-btn map-stats-btn" onclick="openStats()" id="mapStatsBtn">📊 <span data-i18n="statsBtn">统计</span></button>
+    <button class="map-action-btn map-help-btn" onclick="openHelp()" id="mapHelpBtn">❓ <span data-i18n="helpBtn">教程</span></button>
   </div>
   <div class="map-cards" id="mapCards"></div>
+  <p style="margin-top:18px;font-size:11px;color:rgba(255,255,255,0.55);text-align:center;">
+    <a href="./privacy.html" target="_blank" style="color:rgba(255,255,255,0.55);text-decoration:none;">Privacy Policy · 隐私政策</a>
+  </p>
 </div>
 
 <!-- Main game -->
@@ -764,7 +785,16 @@ const I18N={
       explorer:  {e:'🗺️',n:'全图探险家！'},
       speedster: {e:'🚀',n:'极速闪过！'},
       collector: {e:'🎁',n:'收藏家！'},
-    }
+    },
+    helpBtn:'教程',howPlayTitle:'怎么玩？',howPlayStart:'出发！🚀',
+    howPlaySteps:[
+      {icon:'👆',title:'点击翻格',body:'轻触格子翻开，数字告诉你附近有几颗炸弹！'},
+      {icon:'🚩',title:'长按插旗',body:'长按（或右键）在可疑的格子插旗，防止误踩炸弹！'},
+      {icon:'🔢',title:'数字含义',body:'数字 = 周围 8 格中的炸弹数量，用推理找出安全格！'},
+      {icon:'⭐💎⚡',title:'特殊格子',body:'翻到特殊格有惊喜：幸运星加分 · 宝箱得提示 · 闪电暂停计时！'},
+      {icon:'💡🔍⛏️',title:'道具栏',body:'提示高亮安全格 · 透视看穿炸弹 · 安全挖保证不踩雷！'},
+      {icon:'❤️',title:'三条命',body:'每局有 3 条命，踩到炸弹失去一命，全失则游戏结束！'},
+    ]
   },
   en:{
     score:'SCORE',time:'TIME',level:'LEVEL',flags:'FLAGS',lives:'LIVES',
@@ -801,7 +831,16 @@ const I18N={
       explorer:  {e:'🗺️',n:'Full Explorer!'},
       speedster: {e:'🚀',n:'Speedster!'},
       collector: {e:'🎁',n:'Collector!'},
-    }
+    },
+    helpBtn:'How to Play',howPlayTitle:'How to Play?',howPlayStart:"Let's Go! 🚀",
+    howPlaySteps:[
+      {icon:'👆',title:'Tap to Reveal',body:'Tap a tile to reveal it. Numbers show how many bombs are nearby!'},
+      {icon:'🚩',title:'Long Press = Flag',body:'Long press (or right-click) to plant a flag 🚩 on suspected mines.'},
+      {icon:'🔢',title:'What Numbers Mean',body:'A number = bombs in the 8 surrounding tiles. Use logic to stay safe!'},
+      {icon:'⭐💎⚡',title:'Special Tiles',body:'Lucky star = score · Treasure chest = hint · Lightning = timer freeze!'},
+      {icon:'💡🔍⛏️',title:'Power-ups',body:'Hint highlights a safe tile · Peek reveals bombs · Safe Dig auto-clears one!'},
+      {icon:'❤️',title:'3 Lives',body:'You have 3 lives. Hit a bomb = lose a life. Lose all 3 = game over!'},
+    ]
   }
 };
 let lang=localStorage.getItem('sweeper-lang')||'zh';
@@ -911,7 +950,7 @@ function applyLang(){
 function toggleLang(){lang=lang==='zh'?'en':'zh';localStorage.setItem('sweeper-lang',lang);applyLang();}
 
 // ─── Audio ────────────────────────────────────────────────────────────────────
-let actx=null,musicOn=true,soundOn=true,bgmInterval=null;
+let actx=null,musicOn=localStorage.getItem('sweeper-music')!=='0',soundOn=localStorage.getItem('sweeper-sound')!=='0',bgmInterval=null;
 const getACtx=()=>{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();return actx;};
 function playTone(freq,type,dur,vol=0.16,delay=0){
   if(!soundOn)return;
@@ -935,8 +974,20 @@ function startBGM(){
   bgmInterval=setInterval(()=>{if(!musicOn){clearInterval(bgmInterval);bgmInterval=null;return;}if(m[i]>0)playTone(m[i],'sine',.3,.04);i=(i+1)%m.length;},620);
 }
 function stopBGM(){clearInterval(bgmInterval);bgmInterval=null;}
-function toggleMusic(){musicOn=!musicOn;document.getElementById('btnMusic').classList.toggle('muted',!musicOn);musicOn?startBGM():stopBGM();}
-function toggleSound(){soundOn=!soundOn;document.getElementById('btnSound').classList.toggle('muted',!soundOn);}
+function toggleMusic(){musicOn=!musicOn;localStorage.setItem('sweeper-music',musicOn?'1':'0');document.getElementById('btnMusic').classList.toggle('muted',!musicOn);musicOn?startBGM():stopBGM();}
+function toggleSound(){soundOn=!soundOn;localStorage.setItem('sweeper-sound',soundOn?'1':'0');document.getElementById('btnSound').classList.toggle('muted',!soundOn);}
+
+// ─── Help / Tutorial ──────────────────────────────────────────────────────────
+function openHelp(){
+  document.getElementById('helpTitle').textContent=t('howPlayTitle');
+  document.getElementById('helpStartBtn').textContent=t('howPlayStart');
+  const steps=I18N[lang].howPlaySteps;
+  document.getElementById('helpSteps').innerHTML=steps.map(s=>
+    `<div class="help-step"><div class="help-step-icon">${s.icon}</div><div><div class="help-step-title">${s.title}</div><div class="help-step-desc">${s.body}</div></div></div>`
+  ).join('');
+  document.getElementById('helpModal').classList.add('show');
+}
+function closeHelp(){document.getElementById('helpModal').classList.remove('show');}
 
 // ─── Best scores ──────────────────────────────────────────────────────────────
 const getBest=lv=>parseInt(localStorage.getItem(`best-${lv}`)||'0');
@@ -1527,6 +1578,14 @@ setInterval(()=>{document.getElementById('turtleBubble').textContent=pick(t('tur
 // ─── Boot ─────────────────────────────────────────────────────────────────────
 applyLang();
 showMapScreen();
+// Restore audio button states
+document.getElementById('btnMusic').classList.toggle('muted',!musicOn);
+document.getElementById('btnSound').classList.toggle('muted',!soundOn);
+// First-launch tutorial
+if(!localStorage.getItem('sweeper-seen-help')){
+  localStorage.setItem('sweeper-seen-help','1');
+  setTimeout(openHelp,700);
+}
 
 // ─── Service Worker ────────────────────────────────────────────────────────────
 if('serviceWorker' in navigator){
