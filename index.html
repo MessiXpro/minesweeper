@@ -1164,6 +1164,51 @@ function onSliderChange(){
   document.getElementById('customDensityEl').textContent=`${t('customDensity')} ${pct}%${pct>40?' ⚠️':''}`;
 }
 
+// ─── Time Attack ─────────────────────────────────────────────────────────────
+function startTimeAttack(){
+  closeModes();
+  state.mode='time-attack';
+  state.taTimeLeft=180;
+  state.taScore=0;
+  state.taRoundsCleared=0;
+  state.level=3; // fixed 9×9 board (level 3 = intermediate size)
+  showGameScreen();
+  initGame();
+  document.getElementById('starStrip').style.display='none';
+}
+function endTimeAttack(){
+  clearInterval(state.taCountdown);state.taCountdown=null;
+  const prev=parseInt(localStorage.getItem('ta-best')||'0');
+  const isNew=state.taScore>prev;
+  if(isNew)localStorage.setItem('ta-best',state.taScore);
+  document.getElementById('overlayEmoji').textContent='⏱️';
+  document.getElementById('overlayTitle').textContent=t('taOver');
+  document.getElementById('overlayTitle').style.color='#7C3AED';
+  document.getElementById('overlaySub').textContent=`${t('taRounds')}: ${state.taRoundsCleared}`;
+  document.getElementById('overlayStars').textContent='';
+  document.getElementById('overlayScore').textContent=`${t('taFinalScore')}: ${state.taScore.toLocaleString()}`;
+  document.getElementById('overlayBest').textContent=isNew?t('newBest'):`${t('modesBestScore')}: ${prev.toLocaleString()}`;
+  document.getElementById('overlayBtn').textContent=t('mapBtn');
+  document.getElementById('overlay').classList.add('show');
+  stopBGM();
+}
+function startTaCountdown(){
+  clearInterval(state.taCountdown);
+  state.taCountdown=setInterval(()=>{
+    if(state.paused||state.gameOver)return;
+    state.taTimeLeft--;
+    updateTaTimerDisplay();
+    if(state.taTimeLeft<=0){clearInterval(state.taCountdown);state.taCountdown=null;endTimeAttack();}
+  },1000);
+}
+function updateTaTimerDisplay(){
+  const m=Math.floor(state.taTimeLeft/60).toString().padStart(2,'0');
+  const s=(state.taTimeLeft%60).toString().padStart(2,'0');
+  document.getElementById('timerDisplay').textContent=`${m}:${s}`;
+  const panel=document.getElementById('timerDisplay').closest('.stat-panel');
+  if(panel)panel.style.outline=state.taTimeLeft<=30?'2px solid #ef4444':'';
+}
+
 // ─── Best scores ──────────────────────────────────────────────────────────────
 const getBest=lv=>parseInt(localStorage.getItem(`best-${lv}`)||'0');
 function setBest(lv,score){if(score>getBest(lv)){localStorage.setItem(`best-${lv}`,score);return true;}return false;}
@@ -1335,6 +1380,7 @@ let state={
   combo:0,comboTimer:null,bestCombo:0,
   specials:[],boostActive:false,_justUnlocked:null,
   mode:'classic',
+  taTimeLeft:180,taScore:0,taRoundsCleared:0,taCountdown:null,
 };
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
@@ -1352,7 +1398,7 @@ function initGame(){
     specials:Array.from({length:cfg.size},()=>Array(cfg.size).fill(null)),
     boostActive:false,_collectedSpecials:new Set(),_dailyMode:false,
   });
-  clearInterval(state.timerInterval);clearTimeout(state.comboTimer);
+  clearInterval(state.timerInterval);clearTimeout(state.comboTimer);clearInterval(state.taCountdown);state.taCountdown=null;
   state.timerInterval=null;state.comboTimer=null;
   resetIdleTimer();
   renderGrid();updateUI();updateLivesUI();updatePowerupUI();setPlayBtn(false);
@@ -1497,7 +1543,9 @@ function handleClick(r,c){
   if(state.flagged[r][c])return;
   if(state.revealed[r][c]){chordReveal(r,c);return;}
   if(state.firstClick){
-    state.firstClick=false;placeMines(r,c);startTimer();state.gameStarted=true;setPlayBtn(true);startBGM();
+    state.firstClick=false;placeMines(r,c);
+    if(state.mode==='time-attack'){startTaCountdown();}else{startTimer();}
+    state.gameStarted=true;setPlayBtn(true);startBGM();
     unlockAch('firstSteps');
   }
   if(state.board[r][c]===-1){
@@ -1568,6 +1616,15 @@ function endGame(won){
     setMascotMood('happy');
     setTurtleMood('happy');
     const stars=getStarCount();
+    if(state.mode==='time-attack'){
+      state.taScore+=state.score;state.taRoundsCleared++;
+      setTimeout(()=>{
+        state.gameOver=false;state.won=false;
+        initGame();
+        startTaCountdown();
+      },900);
+      return;
+    }
     if(typeof state.level==='number'&&state.level<10){setUnlockedLevel(state.level+1);state._justUnlocked=state.level+1;}
     if(state._dailyMode){localStorage.setItem(getDailyKey()+'-done','1');unlockAch('dailyHero');}
     setTimeout(()=>{checkAchievements(true,stars);showOverlay(true);},800);
@@ -1702,7 +1759,7 @@ function renderTile(tile,r,c){
   else tile.classList.add('hidden');
 }
 const getTileEl=(r,c)=>document.querySelector(`[data-r="${r}"][data-c="${c}"]`);
-function updateUI(){document.getElementById('scoreDisplay').textContent=state.score.toLocaleString();document.getElementById('flagCount').textContent=state.flagsLeft;updateTimerDisplay();}
+function updateUI(){document.getElementById('scoreDisplay').textContent=(state.mode==='time-attack'?(state.taScore+state.score):state.score).toLocaleString();document.getElementById('flagCount').textContent=state.flagsLeft;updateTimerDisplay();if(state.mode==='time-attack')updateTaTimerDisplay();}
 
 // ─── Speech ───────────────────────────────────────────────────────────────────
 function setSpeech(text){document.getElementById('speechBubble').innerHTML=text.replace(/\n/g,'<br>');}
