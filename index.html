@@ -341,6 +341,33 @@
     .help-step-icon{font-size:22px;flex-shrink:0;margin-top:1px;letter-spacing:-3px;}
     .help-step-title{font-family:'Fredoka One',cursive;font-size:15px;color:#3D2F7A;margin-bottom:3px;}
     .help-step-desc{font-size:13px;color:#5B5082;line-height:1.55;}
+    /* ── Modes Modal ── */
+    .mode-card{display:flex;align-items:center;gap:14px;padding:13px 16px;border-radius:18px;margin-bottom:10px;cursor:pointer;border:2px solid transparent;transition:transform .15s,box-shadow .15s;text-align:left;}
+    .mode-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(100,60,200,0.2);}
+    .mode-card:active{transform:scale(0.97);}
+    .mode-card-time{background:linear-gradient(135deg,#fef3c7,#fde68a);border-color:#f59e0b;}
+    .mode-card-surv{background:linear-gradient(135deg,#fce7f3,#fbcfe8);border-color:#ec4899;}
+    .mode-card-custom{background:linear-gradient(135deg,#d1fae5,#a7f3d0);border-color:#10b981;}
+    .mode-card-icon{font-size:30px;flex-shrink:0;}
+    .mode-card-name{font-family:'Fredoka One',cursive;font-size:16px;color:#1f1f3a;}
+    .mode-card-desc{font-size:12px;color:#6b7280;margin-top:2px;line-height:1.4;}
+    .mode-card-best{font-size:11px;font-weight:700;margin-top:4px;color:#7c3aed;}
+    /* Custom difficulty panel */
+    .custom-panel{display:none;text-align:left;margin-top:4px;}
+    .custom-panel.open{display:block;}
+    .preset-row{display:flex;gap:8px;margin-bottom:16px;}
+    .preset-btn{flex:1;padding:10px 4px;border-radius:14px;border:2px solid transparent;text-align:center;cursor:pointer;font-family:'Fredoka One',cursive;font-size:14px;transition:transform .12s,box-shadow .12s;background:#f3f4f6;color:#374151;}
+    .preset-btn.p-easy{background:#d1fae5;border-color:#10b981;color:#065f46;}
+    .preset-btn.p-med{background:#fef3c7;border-color:#f59e0b;color:#92400e;}
+    .preset-btn.p-hard{background:#fce7f3;border-color:#ec4899;color:#9d174d;}
+    .preset-btn.selected{transform:scale(1.07);box-shadow:0 4px 14px rgba(0,0,0,0.18);}
+    .custom-slider-label{font-size:13px;font-weight:700;color:#3D2F7A;display:flex;justify-content:space-between;margin-bottom:6px;}
+    .custom-slider-label span{color:#7c3aed;font-size:15px;}
+    input.mine-slider{width:100%;accent-color:#7c3aed;margin-bottom:4px;}
+    .custom-density{font-size:11px;color:#9080c0;margin-bottom:14px;}
+    .custom-start-btn{width:100%;padding:13px;border-radius:16px;border:none;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;font-family:'Fredoka One',cursive;font-size:17px;cursor:pointer;box-shadow:0 6px 20px rgba(124,58,237,0.4);transition:transform .12s;}
+    .custom-start-btn:hover{transform:scale(1.03);}
+    .map-modes-btn{border-color:rgba(200,160,255,0.7);background:rgba(160,80,255,0.2);}
     /* ── Modal overlay ── */
     .modal-overlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(10,5,40,0.55);backdrop-filter:blur(4px);}
     .modal-overlay.show{display:flex;}
@@ -495,6 +522,57 @@
   </div>
 </div>
 
+<!-- ── More Modes Modal ── -->
+<div class="modal-overlay" id="modesModal" onclick="if(event.target===this)closeModes()">
+  <div class="modal-card" style="max-height:90vh;overflow-y:auto;">
+    <h2 class="modal-title" id="modesTitleEl">更多模式</h2>
+
+    <!-- Time Attack -->
+    <div class="mode-card mode-card-time" onclick="startTimeAttack()">
+      <div class="mode-card-icon">⏱️</div>
+      <div>
+        <div class="mode-card-name" id="taName">时间挑战</div>
+        <div class="mode-card-desc" id="taDesc">3分钟内翻更多格子，刷新最高分</div>
+        <div class="mode-card-best" id="taBest"></div>
+      </div>
+    </div>
+
+    <!-- Survival -->
+    <div class="mode-card mode-card-surv" onclick="startSurvival()">
+      <div class="mode-card-icon">💀</div>
+      <div>
+        <div class="mode-card-name" id="survName">生存模式</div>
+        <div class="mode-card-desc" id="survDesc">1条命连闯，看能到第几关</div>
+        <div class="mode-card-best" id="survBest"></div>
+      </div>
+    </div>
+
+    <!-- Custom -->
+    <div class="mode-card mode-card-custom" onclick="toggleCustomPanel()">
+      <div class="mode-card-icon">🎛️</div>
+      <div>
+        <div class="mode-card-name" id="customNameEl">自定义难度</div>
+        <div class="mode-card-desc" id="customDescEl">选预设，微调地雷数，随心挑战</div>
+      </div>
+    </div>
+
+    <!-- Custom sub-panel -->
+    <div class="custom-panel" id="customPanel">
+      <div class="preset-row">
+        <button class="preset-btn p-easy selected" id="presetEasy" onclick="selectPreset('easy')">简单<br><small>8×8·10雷</small></button>
+        <button class="preset-btn p-med" id="presetMed" onclick="selectPreset('med')">中等<br><small>9×9·15雷</small></button>
+        <button class="preset-btn p-hard" id="presetHard" onclick="selectPreset('hard')">困难<br><small>10×10·25雷</small></button>
+      </div>
+      <div class="custom-slider-label"><span id="customMinesLbl">地雷数量</span><span id="customMinesVal">10</span></div>
+      <input type="range" class="mine-slider" id="mineSlider" min="4" max="40" value="10" oninput="onSliderChange()">
+      <div class="custom-density" id="customDensityEl">密度 15.6%</div>
+      <button class="custom-start-btn" id="customStartBtn" onclick="startCustomGame()">🚀 开始游戏</button>
+    </div>
+
+    <button class="modal-close-btn modal-close-btn--ghost" onclick="closeModes()" id="modesCloseBtn" style="margin-top:12px">关闭</button>
+  </div>
+</div>
+
 <!-- ── Tutorial / Help Modal ── -->
 <div class="modal-overlay" id="helpModal" onclick="if(event.target===this)closeHelp()">
   <div class="modal-card">
@@ -512,6 +590,7 @@
     <button class="map-action-btn map-daily-btn" onclick="openDailyModal()" id="mapDailyBtn">📅 <span data-i18n="dailyBtn">每日挑战</span></button>
     <button class="map-action-btn map-stats-btn" onclick="openStats()" id="mapStatsBtn">📊 <span data-i18n="statsBtn">统计</span></button>
     <button class="map-action-btn map-help-btn" onclick="openHelp()" id="mapHelpBtn">❓ <span data-i18n="helpBtn">教程</span></button>
+    <button class="map-action-btn map-modes-btn" onclick="openModes()" id="mapModesBtn">🎮 <span data-i18n="modesBtn">更多模式</span></button>
   </div>
   <div class="map-cards" id="mapCards"></div>
   <p style="margin-top:18px;font-size:11px;color:rgba(255,255,255,0.55);text-align:center;">
@@ -820,7 +899,16 @@ const I18N={
       {icon:'⭐💎⚡',title:'特殊格子',body:'翻到特殊格有惊喜：幸运星加分 · 宝箱得提示 · 闪电暂停计时！'},
       {icon:'💡🔍⛏️',title:'道具栏',body:'提示高亮安全格 · 透视看穿炸弹 · 安全挖保证不踩雷！'},
       {icon:'❤️',title:'三条命',body:'每局有 3 条命，踩到炸弹失去一命，全失则游戏结束！'},
-    ]
+    ],
+    modesBtn:'更多模式',modesTitle:'更多模式',
+    timeAttackName:'时间挑战',timeAttackDesc:'3分钟内翻更多格子，刷新最高分',
+    survivalName:'生存模式',survivalDesc:'1条命连闯，看能到第几关',
+    customName:'自定义难度',customDesc:'选预设，微调地雷数，随心挑战',
+    taTimeLeft:'剩余',taRounds:'已通关',taOver:'时间到！',taFinalScore:'最终得分',
+    survOver:'生存结束',survReached:'到达第 {n} 关！',survBestLbl:'最远记录',
+    customPresetEasy:'简单',customPresetMed:'中等',customPresetHard:'困难',
+    customMines:'地雷数量',customDensity:'密度',customStart:'🚀 开始游戏',
+    modesBestScore:'最高分',modesBestLevel:'最远关卡',modesClose:'关闭',
   },
   en:{
     score:'SCORE',time:'TIME',level:'LEVEL',flags:'FLAGS',lives:'LIVES',
@@ -866,7 +954,16 @@ const I18N={
       {icon:'⭐💎⚡',title:'Special Tiles',body:'Lucky star = score · Treasure chest = hint · Lightning = timer freeze!'},
       {icon:'💡🔍⛏️',title:'Power-ups',body:'Hint highlights a safe tile · Peek reveals bombs · Safe Dig auto-clears one!'},
       {icon:'❤️',title:'3 Lives',body:'You have 3 lives. Hit a bomb = lose a life. Lose all 3 = game over!'},
-    ]
+    ],
+    modesBtn:'More Modes',modesTitle:'More Modes',
+    timeAttackName:'Time Attack',timeAttackDesc:'3 minutes — flip as many tiles as possible!',
+    survivalName:'Survival',survivalDesc:'1 life — how far can you go?',
+    customName:'Custom',customDesc:'Pick a preset and fine-tune the mines.',
+    taTimeLeft:'Left',taRounds:'Cleared',taOver:"Time's Up!",taFinalScore:'Final Score',
+    survOver:'Game Over',survReached:'Reached Level {n}!',survBestLbl:'Best Level',
+    customPresetEasy:'Easy',customPresetMed:'Medium',customPresetHard:'Hard',
+    customMines:'Mines',customDensity:'Density',customStart:'🚀 Start',
+    modesBestScore:'Best Score',modesBestLevel:'Best Level',modesClose:'Close',
   }
 };
 let lang=localStorage.getItem('sweeper-lang')||'zh';
@@ -1014,6 +1111,54 @@ function openHelp(){
   document.getElementById('helpModal').classList.add('show');
 }
 function closeHelp(){document.getElementById('helpModal').classList.remove('show');}
+
+// ─── Modes Modal ──────────────────────────────────────────────────────────────
+let _customPreset={size:8,mines:10,preset:'easy'};
+function openModes(){
+  document.getElementById('modesTitleEl').textContent=t('modesTitle');
+  document.getElementById('taName').textContent=t('timeAttackName');
+  document.getElementById('taDesc').textContent=t('timeAttackDesc');
+  document.getElementById('survName').textContent=t('survivalName');
+  document.getElementById('survDesc').textContent=t('survivalDesc');
+  document.getElementById('customNameEl').textContent=t('customName');
+  document.getElementById('customDescEl').textContent=t('customDesc');
+  document.getElementById('modesCloseBtn').textContent=t('modesClose');
+  document.getElementById('customStartBtn').textContent=t('customStart');
+  document.getElementById('customMinesLbl').textContent=t('customMines');
+  const taB=localStorage.getItem('ta-best');
+  document.getElementById('taBest').textContent=taB?`${t('modesBestScore')}: ${parseInt(taB).toLocaleString()}`:'';
+  const sB=localStorage.getItem('surv-best');
+  document.getElementById('survBest').textContent=sB?`${t('modesBestLevel')}: ${sB}`:'';
+  document.getElementById('modesModal').classList.add('show');
+}
+function closeModes(){
+  document.getElementById('modesModal').classList.remove('show');
+  document.getElementById('customPanel').classList.remove('open');
+}
+function toggleCustomPanel(){
+  document.getElementById('customPanel').classList.toggle('open');
+}
+function selectPreset(p){
+  const presets={easy:{size:8,mines:10},med:{size:9,mines:15},hard:{size:10,mines:25}};
+  _customPreset={...presets[p],preset:p};
+  ['easy','med','hard'].forEach(k=>{
+    const id=`preset${k.charAt(0).toUpperCase()+k.slice(1)}`;
+    document.getElementById(id).classList.toggle('selected',k===p);
+  });
+  const sl=document.getElementById('mineSlider');
+  sl.min=Math.max(4,Math.floor(presets[p].size*presets[p].size*0.08));
+  sl.max=Math.floor(presets[p].size*presets[p].size*0.45);
+  sl.value=presets[p].mines;
+  onSliderChange();
+}
+function onSliderChange(){
+  const v=parseInt(document.getElementById('mineSlider').value);
+  _customPreset.mines=v;
+  document.getElementById('customMinesVal').textContent=v;
+  const total=_customPreset.size*_customPreset.size;
+  const pct=Math.round(v/total*100);
+  document.getElementById('customDensityEl').textContent=`${t('customDensity')} ${pct}%${pct>40?' ⚠️':''}`;
+}
 
 // ─── Best scores ──────────────────────────────────────────────────────────────
 const getBest=lv=>parseInt(localStorage.getItem(`best-${lv}`)||'0');
