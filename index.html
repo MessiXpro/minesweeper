@@ -367,6 +367,14 @@
     .custom-density{font-size:11px;color:#9080c0;margin-bottom:14px;}
     .custom-start-btn{width:100%;padding:13px;border-radius:16px;border:none;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:white;font-family:'Fredoka One',cursive;font-size:17px;cursor:pointer;box-shadow:0 6px 20px rgba(124,58,237,0.4);transition:transform .12s;}
     .custom-start-btn:hover{transform:scale(1.03);}
+    /* ── Survival Progress ── */
+    .surv-progress{display:flex;align-items:center;gap:3px;padding:6px 14px;background:rgba(0,0,0,0.18);border-bottom:1px solid rgba(255,255,255,0.07);overflow-x:auto;flex-wrap:nowrap;}
+    .surv-pip{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0;transition:all .3s;}
+    .surv-pip.done{background:#10b981;color:white;}
+    .surv-pip.current{background:#f59e0b;color:white;box-shadow:0 0 10px rgba(245,158,11,0.7);animation:survPulse 1s ease-in-out infinite;}
+    .surv-pip.locked{background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.25);}
+    .surv-arrow{color:rgba(255,255,255,0.15);font-size:10px;flex-shrink:0;}
+    @keyframes survPulse{0%,100%{box-shadow:0 0 8px rgba(245,158,11,0.6)}50%{box-shadow:0 0 18px rgba(245,158,11,0.9)}}
     .map-modes-btn{border-color:rgba(200,160,255,0.7);background:rgba(160,80,255,0.2);}
     /* ── Modal overlay ── */
     .modal-overlay{position:fixed;inset:0;z-index:200;display:none;align-items:center;justify-content:center;background:rgba(10,5,40,0.55);backdrop-filter:blur(4px);}
@@ -659,6 +667,9 @@
       <span class="sc-text" id="sc3text">??秒内</span>
     </div>
   </div>
+
+  <!-- Survival progress bar -->
+  <div class="surv-progress" id="survProgress" style="display:none"></div>
 
   <div class="main-area">
     <!-- Left: Cat -->
@@ -1031,6 +1042,7 @@ function renderMapScreen(){
 
 function showMapScreen(){
   currentScreen='map';
+  if(state.mode==='survival')state.mode='classic';
   renderMapScreen();
   document.getElementById('map-screen').style.display='flex';
   document.getElementById('game-wrap').style.display='none';
@@ -1054,7 +1066,7 @@ function enterLevel(n){
 
 function overlayBtnClick(){
   document.getElementById('overlay').classList.remove('show');
-  if(state.won){showMapScreen();}else{resetGame();}
+  if(state.won||state.mode==='survival'){showMapScreen();}else{resetGame();}
 }
 
 function applyLang(){
@@ -1191,6 +1203,44 @@ function endTimeAttack(){
   document.getElementById('overlayBtn').textContent=t('mapBtn');
   document.getElementById('overlay').classList.add('show');
   stopBGM();
+}
+// ─── Survival Mode ────────────────────────────────────────────────────────────
+function startSurvival(){
+  closeModes();
+  state.mode='survival';
+  state.survLevel=1;
+  state.survScore=0;
+  state.level=state.survLevel;
+  showGameScreen();
+  initGame();
+}
+function renderSurvProgress(){
+  const el=document.getElementById('survProgress');
+  if(!el)return;
+  el.style.display=state.mode==='survival'?'flex':'none';
+  if(state.mode!=='survival')return;
+  let html='';
+  for(let i=1;i<=10;i++){
+    if(i>1)html+=`<span class="surv-arrow">›</span>`;
+    const cls=i<state.survLevel?'done':i===state.survLevel?'current':'locked';
+    html+=`<div class="surv-pip ${cls}">${i}</div>`;
+  }
+  el.innerHTML=html;
+}
+function endSurvival(won){
+  clearInterval(state.timerInterval);state.timerInterval=null;stopBGM();
+  const reached=won?10:state.survLevel;
+  const prev=parseInt(localStorage.getItem('surv-best')||'0');
+  if(reached>prev)localStorage.setItem('surv-best',reached);
+  document.getElementById('overlayEmoji').textContent=won?'🏆':'💀';
+  document.getElementById('overlayTitle').textContent=t('survOver');
+  document.getElementById('overlayTitle').style.color=won?'#16A34A':'#DC2626';
+  document.getElementById('overlaySub').textContent=t('survReached').replace('{n}',reached);
+  document.getElementById('overlayStars').textContent=won?'🏆🏆🏆':'';
+  document.getElementById('overlayScore').textContent=`${t('taFinalScore')}: ${state.survScore.toLocaleString()}`;
+  document.getElementById('overlayBest').textContent=reached>prev?t('newBest'):`${t('modesBestLevel')}: ${prev}`;
+  document.getElementById('overlayBtn').textContent=t('mapBtn');
+  document.getElementById('overlay').classList.add('show');
 }
 function startTaCountdown(){
   clearInterval(state.taCountdown);
@@ -1381,11 +1431,13 @@ let state={
   specials:[],boostActive:false,_justUnlocked:null,
   mode:'classic',
   taTimeLeft:180,taScore:0,taRoundsCleared:0,taCountdown:null,
+  survLevel:1,survScore:0,
 };
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
 function initGame(){
-  const cfg=LEVELS[state.level];
+  if(state.mode==='survival')state.level=state.survLevel;
+  const cfg=LEVELS[Math.min(state.level,10)]||LEVELS[10];
   Object.assign(state,{
     size:cfg.size,mines:cfg.mines,
     board:Array.from({length:cfg.size},()=>Array(cfg.size).fill(0)),
@@ -1394,7 +1446,7 @@ function initGame(){
     gameStarted:false,gameOver:false,won:false,firstClick:true,
     score:0,elapsed:0,paused:false,
     totalSafe:cfg.size*cfg.size-cfg.mines,revealedSafe:0,flagsLeft:cfg.mines,
-    lives:MAX_LIVES,mineHits:0,combo:0,bestCombo:0,
+    lives:state.mode==='survival'?1:MAX_LIVES,mineHits:0,combo:0,bestCombo:0,
     specials:Array.from({length:cfg.size},()=>Array(cfg.size).fill(null)),
     boostActive:false,_collectedSpecials:new Set(),_dailyMode:false,
   });
@@ -1402,7 +1454,7 @@ function initGame(){
   state.timerInterval=null;state.comboTimer=null;
   resetIdleTimer();
   renderGrid();updateUI();updateLivesUI();updatePowerupUI();setPlayBtn(false);
-  setSpeech(pick(t('idle')));updateStars();
+  setSpeech(pick(t('idle')));updateStars();renderSurvProgress();
   document.getElementById('overlay').classList.remove('show');
   document.getElementById('comboBadge').classList.remove('show');
   renderBestBar();
@@ -1628,6 +1680,16 @@ function endGame(won){
     }
     if(typeof state.level==='number'&&state.level<10){setUnlockedLevel(state.level+1);state._justUnlocked=state.level+1;}
     if(state._dailyMode){localStorage.setItem(getDailyKey()+'-done','1');unlockAch('dailyHero');}
+    if(state.mode==='survival'){
+      state.survScore+=state.score;
+      if(state.survLevel>=10){endSurvival(true);return;}
+      state.survLevel++;
+      setTimeout(()=>{
+        state.gameOver=false;state.won=false;
+        initGame();
+      },1000);
+      return;
+    }
     setTimeout(()=>{checkAchievements(true,stars);showOverlay(true);},800);
   }else{
     if(state.mode==='time-attack'){
@@ -1643,6 +1705,7 @@ function endGame(won){
       },1200);
       return;
     }
+    if(state.mode==='survival'){setTimeout(()=>endSurvival(false),1200);revealAllMines();setSpeech('😅');setMascotMood('cry');updateUI();setPlayBtn(false);return;}
     revealAllMines();setSpeech('😅');
     setMascotMood('cry');
     setTurtleMood('scared',3000);
