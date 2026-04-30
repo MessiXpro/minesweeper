@@ -1398,7 +1398,7 @@ function initGame(){
     specials:Array.from({length:cfg.size},()=>Array(cfg.size).fill(null)),
     boostActive:false,_collectedSpecials:new Set(),_dailyMode:false,
   });
-  clearInterval(state.timerInterval);clearTimeout(state.comboTimer);clearInterval(state.taCountdown);state.taCountdown=null;
+  clearInterval(state.timerInterval);clearTimeout(state.comboTimer);clearInterval(state.taCountdown);state.taCountdown=null;// startTaCountdown() re-creates this in TA mode
   state.timerInterval=null;state.comboTimer=null;
   resetIdleTimer();
   renderGrid();updateUI();updateLivesUI();updatePowerupUI();setPlayBtn(false);
@@ -1619,6 +1619,7 @@ function endGame(won){
     if(state.mode==='time-attack'){
       state.taScore+=state.score;state.taRoundsCleared++;
       setTimeout(()=>{
+        if(state.mode!=='time-attack'||state.taTimeLeft<=0)return;
         state.gameOver=false;state.won=false;
         initGame();
         startTaCountdown();
@@ -1629,6 +1630,19 @@ function endGame(won){
     if(state._dailyMode){localStorage.setItem(getDailyKey()+'-done','1');unlockAch('dailyHero');}
     setTimeout(()=>{checkAchievements(true,stars);showOverlay(true);},800);
   }else{
+    if(state.mode==='time-attack'){
+      // In TA, mine loss just resets the board — timer continues
+      revealAllMines();setSpeech('😅');
+      setTimeout(()=>{
+        if(state.mode!=='time-attack'||state.taTimeLeft<=0)return;
+        state.gameOver=false;state.won=false;
+        // Restore lives for next board
+        state.lives=3;
+        initGame();
+        startTaCountdown();
+      },1200);
+      return;
+    }
     revealAllMines();setSpeech('😅');
     setMascotMood('cry');
     setTurtleMood('scared',3000);
