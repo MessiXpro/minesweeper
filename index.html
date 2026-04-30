@@ -1465,7 +1465,7 @@ function updateStars(){const s=getStarCount();['star1','star2','star3'].forEach(
 function updateStarStrip(){
   const strip=document.getElementById('starStrip');
   if(!strip)return;
-  const showStrip=(state.mode==='classic'||state.mode==='custom')&&!state.gameOver;
+  const showStrip=(state.mode==='classic'||state.mode==='custom')&&(!state.gameOver||state.won);
   strip.style.display=showStrip?'flex':'none';
   if(!showStrip)return;
   const lv=typeof state.level==='number'?state.level:3;
