@@ -324,6 +324,16 @@
     .map-daily-btn{border-color:rgba(255,220,80,0.7);background:rgba(255,200,40,0.25);}
     .map-stats-btn{border-color:rgba(140,200,255,0.7);background:rgba(80,160,255,0.2);}
     .map-help-btn{border-color:rgba(180,255,180,0.7);background:rgba(80,220,120,0.2);}
+    /* ── Star Condition Strip ── */
+    .star-strip{display:flex;align-items:stretch;background:rgba(0,0,0,0.18);border-bottom:1px solid rgba(255,255,255,0.07);padding:0;}
+    .star-cond{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:5px 4px;gap:1px;border-right:1px solid rgba(255,255,255,0.07);transition:background .25s;}
+    .star-cond:last-child{border-right:none;}
+    .star-cond.achieved{background:rgba(253,211,77,0.12);}
+    .sc-icon{font-size:13px;line-height:1;}
+    .sc-text{font-size:10px;font-weight:700;color:rgba(255,255,255,0.38);line-height:1.2;text-align:center;}
+    .star-cond.achieved .sc-icon{filter:none;}
+    .star-cond.achieved .sc-text{color:#fcd34d;}
+    .star-cond:not(.achieved) .sc-icon{filter:grayscale(1) opacity(0.35);}
     /* ── Help / Tutorial Modal ── */
     .help-steps{text-align:left;margin:10px 0 4px;max-height:52vh;overflow-y:auto;padding-right:4px;}
     .help-steps::-webkit-scrollbar{width:4px}.help-steps::-webkit-scrollbar-thumb{background:rgba(124,58,237,.3);border-radius:4px}
@@ -554,6 +564,22 @@
   </div>
 
   <div class="best-bar" id="bestBar"></div>
+
+  <!-- Star condition strip (shown during classic/custom game) -->
+  <div class="star-strip" id="starStrip" style="display:none">
+    <div class="star-cond" id="sc1">
+      <span class="sc-icon">⭐</span>
+      <span class="sc-text" id="sc1text">通关</span>
+    </div>
+    <div class="star-cond" id="sc2">
+      <span class="sc-icon">⭐</span>
+      <span class="sc-text" id="sc2text">零踩雷</span>
+    </div>
+    <div class="star-cond" id="sc3">
+      <span class="sc-icon">⭐</span>
+      <span class="sc-text" id="sc3text">??秒内</span>
+    </div>
+  </div>
 
   <div class="main-area">
     <!-- Left: Cat -->
@@ -1159,6 +1185,7 @@ let state={
   lives:MAX_LIVES,mineHits:0,
   combo:0,comboTimer:null,bestCombo:0,
   specials:[],boostActive:false,_justUnlocked:null,
+  mode:'classic',
 };
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
@@ -1425,12 +1452,34 @@ function showOverlay(won){
 }
 
 // ─── Stars ────────────────────────────────────────────────────────────────────
+const STAR_TIME_LIMITS=[45,90,120,150,180,210,240,300,360,420];
 function getStarCount(){
-  const pct=state.revealedSafe/state.totalSafe;
-  if(pct>=1){if(state.elapsed<60&&state.mineHits===0)return 3;if(state.elapsed<180&&state.mineHits<=1)return 2;return 1;}
-  if(pct>=.7)return 1;return 0;
+  if(!state.won){return state.revealedSafe/state.totalSafe>=0.7?1:0;}
+  const lv=typeof state.level==='number'?state.level:3;
+  const limit=STAR_TIME_LIMITS[lv-1]||120;
+  if(state.mineHits===0&&state.elapsed<=limit)return 3;
+  if(state.mineHits===0)return 2;
+  return 1;
 }
-function updateStars(){const s=getStarCount();['star1','star2','star3'].forEach((id,i)=>document.getElementById(id).classList.toggle('dim',i>=s));}
+function updateStars(){const s=getStarCount();['star1','star2','star3'].forEach((id,i)=>document.getElementById(id).classList.toggle('dim',i>=s));updateStarStrip();}
+function updateStarStrip(){
+  const strip=document.getElementById('starStrip');
+  if(!strip)return;
+  const showStrip=(state.mode==='classic'||state.mode==='custom')&&!state.gameOver;
+  strip.style.display=showStrip?'flex':'none';
+  if(!showStrip)return;
+  const lv=typeof state.level==='number'?state.level:3;
+  const limit=STAR_TIME_LIMITS[lv-1]||120;
+  const won=state.revealedSafe===state.totalSafe&&state.totalSafe>0;
+  const noHits=state.mineHits===0;
+  const fast=state.elapsed<=limit;
+  document.getElementById('sc1').classList.toggle('achieved',won);
+  document.getElementById('sc2').classList.toggle('achieved',noHits);
+  document.getElementById('sc3').classList.toggle('achieved',won&&noHits&&fast);
+  document.getElementById('sc1text').textContent=lang==='zh'?'通关':'Clear';
+  document.getElementById('sc2text').textContent=lang==='zh'?'零踩雷':'No hits';
+  document.getElementById('sc3text').textContent=(lang==='zh'?`${limit}秒内`:`<${limit}s`);
+}
 
 // ─── Timer ────────────────────────────────────────────────────────────────────
 function startTimer(){
