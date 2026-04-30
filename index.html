@@ -1454,7 +1454,7 @@ function showOverlay(won){
 // ─── Stars ────────────────────────────────────────────────────────────────────
 const STAR_TIME_LIMITS=[45,90,120,150,180,210,240,300,360,420];
 function getStarCount(){
-  if(!state.won){return state.revealedSafe/state.totalSafe>=0.7?1:0;}
+  if(!state.won)return 0;
   const lv=typeof state.level==='number'?state.level:3;
   const limit=STAR_TIME_LIMITS[lv-1]||120;
   if(state.mineHits===0&&state.elapsed<=limit)return 3;
