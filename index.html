@@ -1125,10 +1125,14 @@ function openModes(){
   document.getElementById('modesCloseBtn').textContent=t('modesClose');
   document.getElementById('customStartBtn').textContent=t('customStart');
   document.getElementById('customMinesLbl').textContent=t('customMines');
+  document.getElementById('presetEasy').innerHTML=`${t('customPresetEasy')}<br><small>8×8·10雷</small>`;
+  document.getElementById('presetMed').innerHTML=`${t('customPresetMed')}<br><small>9×9·15雷</small>`;
+  document.getElementById('presetHard').innerHTML=`${t('customPresetHard')}<br><small>10×10·25雷</small>`;
   const taB=localStorage.getItem('ta-best');
   document.getElementById('taBest').textContent=taB?`${t('modesBestScore')}: ${parseInt(taB).toLocaleString()}`:'';
   const sB=localStorage.getItem('surv-best');
   document.getElementById('survBest').textContent=sB?`${t('modesBestLevel')}: ${sB}`:'';
+  selectPreset(_customPreset.preset);
   document.getElementById('modesModal').classList.add('show');
 }
 function closeModes(){
