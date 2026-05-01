@@ -1092,7 +1092,7 @@ function showMapScreen(){
   document.getElementById('game-wrap').style.display='none';
   if(state._justUnlocked){
     const lv=state._justUnlocked;state._justUnlocked=null;
-    setTimeout(()=>{const card=document.getElementById(`lvcard-${lv}`);if(card)card.classList.add('just-unlocked');},300);
+    setTimeout(()=>{const card=document.getElementById(`lvcard-${lv}`);if(card)card.classList.add('just-unlocked');playUnlock();},300);
   }
 }
 
@@ -1142,17 +1142,55 @@ function playTone(freq,type,dur,vol=0.16,delay=0){
   osc.start(ac.currentTime+delay);osc.stop(ac.currentTime+delay+dur);
 }
 const vibrate=p=>navigator.vibrate&&navigator.vibrate(p);
-const playReveal =()=>playTone(523,'sine',.12,.13);
+// BGM uses its own tone function so music/sfx toggles are independent
+function bgmTone(freq,type,dur,vol,delay=0){
+  if(!musicOn)return;
+  const ac=getACtx(),osc=ac.createOscillator(),g=ac.createGain();
+  osc.connect(g);g.connect(ac.destination);osc.type=type;
+  osc.frequency.setValueAtTime(freq,ac.currentTime+delay);
+  g.gain.setValueAtTime(vol,ac.currentTime+delay);
+  g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+delay+dur);
+  osc.start(ac.currentTime+delay);osc.stop(ac.currentTime+delay+dur);
+}
+// SFX — slight pitch variation on reveal to avoid robotic repetition
+const playReveal =()=>playTone(500+Math.floor(Math.random()*8)*16,'sine',.12,.13);
 const playFlag   =()=>{playTone(659,'square',.1,.1);playTone(784,'square',.1,.08,.08);vibrate(12);};
-const playMine   =()=>{playTone(100,'sawtooth',.5,.26);playTone(80,'sawtooth',.4,.2,.1);vibrate([40,20,60]);};
-const playWin    =()=>{[523,659,784,1047].forEach((f,i)=>playTone(f,'sine',.25,.18,i*.12));vibrate([20,30,20,30,80]);};
-const playHintSnd=()=>{playTone(880,'sine',.2,.15);playTone(1100,'sine',.2,.12,.15);};
-const playCombo  =()=>{playTone(784,'sine',.1,.16);playTone(1047,'sine',.12,.18,.1);};
+const playMine   =()=>{playTone(100,'sawtooth',.5,.26);playTone(80,'sawtooth',.4,.2,.1);playTone(220,'sine',.18,.05,.28);vibrate([40,20,60]);};
+// Win fanfare — 5-note rise + chord resolution
+const playWin=()=>{
+  [523,659,784,1047,1319].forEach((f,i)=>playTone(f,'sine',.38,.2,i*.1));
+  setTimeout(()=>[523,659,784].forEach((f,i)=>playTone(f,'sine',.55,.18,i*.07)),650);
+  vibrate([20,30,20,30,80]);
+};
+const playHintSnd =()=>{playTone(880,'sine',.2,.15);playTone(1100,'sine',.2,.12,.15);};
 const playLoseLife=()=>playTone(200,'sawtooth',.3,.2);
+const playUnlock  =()=>{[659,784,988,1047].forEach((f,i)=>playTone(f,'sine',.22,.14,i*.09));};
+// Combo SFX scales with combo count
+function playCombo(){
+  const c=state.combo;
+  if(c>=8){[784,988,1175,1319].forEach((f,i)=>playTone(f,'sine',.22,.12,i*.04));vibrate([10,10,10,60]);}
+  else if(c>=5){playTone(880,'sine',.2,.11);playTone(1175,'sine',.2,.1,.07);vibrate([10,25]);}
+  else if(c>=3){playTone(784,'sine',.16,.1);playTone(1047,'sine',.16,.09,.07);}
+  else{playTone(784,'sine',.12,.09);playTone(987,'sine',.1,.07,.06);}
+}
+// BGM — 32-note two-phrase melody (~18s loop) with bass voice
 function startBGM(){
   if(!musicOn||bgmInterval)return;
-  const m=[523,587,659,784,659,587,523,0];let i=0;
-  bgmInterval=setInterval(()=>{if(!musicOn){clearInterval(bgmInterval);bgmInterval=null;return;}if(m[i]>0)playTone(m[i],'sine',.3,.04);i=(i+1)%m.length;},620);
+  const mel=[
+    523,659,784,659,523,659,784,880,
+    784,659,587,659,784,659,523,  0,
+    523,659,784,880,784,659,587,659,
+    523,  0,523,659,784,  0,  0,  0
+  ];
+  const bas=[131,0,0,0,131,0,0,0,196,0,0,0,131,0,0,0,
+             131,0,0,0,196,0,0,0,131,0,0,0,131,0,0,0];
+  let i=0;
+  bgmInterval=setInterval(()=>{
+    if(!musicOn){clearInterval(bgmInterval);bgmInterval=null;return;}
+    if(mel[i]>0)bgmTone(mel[i],'sine',.26,.046);
+    if(bas[i]>0)bgmTone(bas[i],'sine',.32,.022);
+    i=(i+1)%mel.length;
+  },560);
 }
 function stopBGM(){clearInterval(bgmInterval);bgmInterval=null;}
 function toggleMusic(){musicOn=!musicOn;localStorage.setItem('sweeper-music',musicOn?'1':'0');document.getElementById('btnMusic').classList.toggle('muted',!musicOn);musicOn?startBGM():stopBGM();}
@@ -1336,6 +1374,7 @@ function startTaCountdown(){
     if(state.paused||state.gameOver)return;
     state.taTimeLeft--;
     updateTaTimerDisplay();
+    if(state.taTimeLeft>0&&state.taTimeLeft<=10)playTone(880,'square',.04,.07); // urgency tick
     if(state.taTimeLeft<=0){clearInterval(state.taCountdown);state.taCountdown=null;endTimeAttack();}
   },1000);
 }
