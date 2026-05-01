@@ -1083,6 +1083,7 @@ function applyLang(){
   document.getElementById('overlayBtn').textContent=state.gameOver&&state.won?t('mapBtn'):t('playAgain');
   renderBestBar();
   if(currentScreen==='map')renderMapScreen();
+  if(document.getElementById('modesModal').classList.contains('show'))openModes();
 }
 function toggleLang(){lang=lang==='zh'?'en':'zh';localStorage.setItem('sweeper-lang',lang);applyLang();}
 
@@ -1860,7 +1861,18 @@ function renderTile(tile,r,c){
   else tile.classList.add('hidden');
 }
 const getTileEl=(r,c)=>document.querySelector(`[data-r="${r}"][data-c="${c}"]`);
-function updateUI(){document.getElementById('scoreDisplay').textContent=(state.mode==='time-attack'?(state.taScore+state.score):state.score).toLocaleString();document.getElementById('flagCount').textContent=state.flagsLeft;updateTimerDisplay();if(state.mode==='time-attack')updateTaTimerDisplay();}
+function updateUI(){document.getElementById('scoreDisplay').textContent=(state.mode==='time-attack'?(state.taScore+state.score):state.score).toLocaleString();document.getElementById('flagCount').textContent=state.flagsLeft;updateTimerDisplay();if(state.mode==='time-attack')updateTaTimerDisplay();
+  if(state.mode==='time-attack'||state.mode==='survival'||state.mode==='custom'){
+    document.getElementById('levelSelect').style.display='none';
+    let modeLabel=state.mode==='time-attack'?t('timeAttackName'):state.mode==='survival'?`${t('survivalName')} Lv${state.survLevel}`:t('customName');
+    let el=document.getElementById('modeModeLabel');
+    if(!el){el=document.createElement('div');el.id='modeModeLabel';el.style.cssText='font-family:Fredoka One,cursive;font-size:13px;color:white;padding:4px 8px;';document.getElementById('levelSelect').parentNode.appendChild(el);}
+    el.textContent=modeLabel;el.style.display='';
+  }else{
+    document.getElementById('levelSelect').style.display='';
+    const ml=document.getElementById('modeModeLabel');if(ml)ml.style.display='none';
+  }
+}
 
 // ─── Speech ───────────────────────────────────────────────────────────────────
 function setSpeech(text){document.getElementById('speechBubble').innerHTML=text.replace(/\n/g,'<br>');}
