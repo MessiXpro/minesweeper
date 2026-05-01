@@ -301,7 +301,11 @@
     /* ── Map Screen ── */
     .map-screen{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;}
     .map-title{font-family:'Fredoka One',cursive;font-size:38px;color:white;text-shadow:0 3px 14px rgba(0,0,0,0.32);margin-bottom:6px;letter-spacing:1px;}
-    .map-sub{font-size:14px;font-weight:800;color:rgba(255,255,255,0.82);margin-bottom:26px;}
+    .map-sub{font-size:14px;font-weight:800;color:rgba(255,255,255,0.82);margin-bottom:10px;}
+    .map-star-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;}
+    .map-star-track{width:160px;height:8px;background:rgba(255,255,255,0.15);border-radius:4px;overflow:hidden;}
+    .map-star-fill{height:100%;background:linear-gradient(90deg,#fbbf24,#f59e0b);border-radius:4px;transition:width .4s ease;}
+    .map-star-label{font-family:'Fredoka One',cursive;font-size:14px;color:#fcd34d;min-width:54px;}
     .map-cards{display:flex;gap:14px;flex-wrap:wrap;justify-content:center;max-width:900px;}
     .level-card{background:linear-gradient(160deg,rgba(255,255,255,0.26),rgba(255,255,255,0.10));border:2px solid rgba(255,255,255,0.55);border-radius:28px;padding:18px 14px 16px;width:155px;text-align:center;backdrop-filter:blur(12px);box-shadow:0 8px 32px rgba(40,20,100,0.3),inset 0 1px 0 rgba(255,255,255,0.4);transition:transform .22s cubic-bezier(.34,1.56,.64,1),box-shadow .22s;position:relative;overflow:hidden;cursor:pointer;}
     .level-card:not(.locked):hover{transform:translateY(-8px) scale(1.06);box-shadow:0 22px 48px rgba(40,20,100,0.48),inset 0 1px 0 rgba(255,255,255,.5);}
@@ -321,7 +325,11 @@
     .map-action-btns{display:flex;gap:12px;margin-bottom:18px;justify-content:center;}
     .map-action-btn{font-family:'Fredoka One',cursive;font-size:16px;padding:10px 22px;border-radius:22px;border:2.5px solid rgba(255,255,255,0.7);background:rgba(255,255,255,0.22);color:white;cursor:pointer;backdrop-filter:blur(10px);box-shadow:0 4px 18px rgba(40,20,100,0.25);transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .18s;text-shadow:0 2px 6px rgba(0,0,0,0.22);}
     .map-action-btn:hover{transform:translateY(-4px) scale(1.07);box-shadow:0 10px 28px rgba(40,20,100,0.38);}
-    .map-daily-btn{border-color:rgba(255,220,80,0.7);background:rgba(255,200,40,0.25);}
+    .map-daily-btn{border-color:rgba(255,220,80,0.7);background:rgba(255,200,40,0.25);position:relative;}
+    .map-daily-btn .daily-dot{position:absolute;top:-5px;right:-5px;width:12px;height:12px;background:#ef4444;border-radius:50%;border:2px solid rgba(30,10,80,0.8);display:none;}
+    .map-daily-btn.has-dot .daily-dot{display:block;animation:dotPulse 1.5s ease-in-out infinite;}
+    .map-daily-streak{font-size:11px;font-weight:800;background:rgba(0,0,0,0.2);border-radius:8px;padding:1px 5px;margin-left:4px;vertical-align:middle;}
+    @keyframes dotPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.3);opacity:.7}}
     .map-stats-btn{border-color:rgba(140,200,255,0.7);background:rgba(80,160,255,0.2);}
     .map-help-btn{border-color:rgba(180,255,180,0.7);background:rgba(80,220,120,0.2);}
     /* ── Star Condition Strip ── */
@@ -581,6 +589,18 @@
   </div>
 </div>
 
+<!-- ── Rate App Modal ── -->
+<div class="modal-overlay" id="rateModal">
+  <div class="modal-card" style="max-width:320px">
+    <div style="font-size:44px;margin-bottom:8px">⭐</div>
+    <h2 class="modal-title" id="rateTitleEl">喜欢这个游戏吗？</h2>
+    <p style="font-size:14px;color:#6B5B9A;margin-bottom:20px" id="rateSubEl">你的评价能帮助更多人发现它！</p>
+    <button class="modal-close-btn" onclick="doRate()" id="rateYesBtn" style="width:100%;margin-bottom:8px">⭐ 去评分</button>
+    <button class="modal-close-btn modal-close-btn--ghost" onclick="dismissRate(false)" id="rateLaterBtn" style="width:100%;margin-top:0">稍后再说</button>
+    <button onclick="dismissRate(true)" style="margin-top:10px;background:none;border:none;color:#B0A0D0;font-size:12px;cursor:pointer" id="rateNeverBtn">不再提示</button>
+  </div>
+</div>
+
 <!-- ── Tutorial / Help Modal ── -->
 <div class="modal-overlay" id="helpModal" onclick="if(event.target===this)closeHelp()">
   <div class="modal-card">
@@ -594,8 +614,12 @@
 <div id="map-screen" class="map-screen">
   <h1 class="map-title" data-i18n="mapTitle">选择关卡</h1>
   <p class="map-sub" data-i18n="mapSub">完成关卡解锁下一个地点！</p>
+  <div class="map-star-bar">
+    <div class="map-star-track"><div class="map-star-fill" id="mapStarFill"></div></div>
+    <div class="map-star-label" id="mapStarLabel">0 / 30 ⭐</div>
+  </div>
   <div class="map-action-btns">
-    <button class="map-action-btn map-daily-btn" onclick="openDailyModal()" id="mapDailyBtn">📅 <span data-i18n="dailyBtn">每日挑战</span></button>
+    <button class="map-action-btn map-daily-btn" onclick="openDailyModal()" id="mapDailyBtn">📅 <span data-i18n="dailyBtn">每日挑战</span><span class="map-daily-streak" id="dailyStreakChip" style="display:none"></span><span class="daily-dot"></span></button>
     <button class="map-action-btn map-stats-btn" onclick="openStats()" id="mapStatsBtn">📊 <span data-i18n="statsBtn">统计</span></button>
     <button class="map-action-btn map-help-btn" onclick="openHelp()" id="mapHelpBtn">❓ <span data-i18n="helpBtn">教程</span></button>
     <button class="map-action-btn map-modes-btn" onclick="openModes()" id="mapModesBtn">🎮 <span data-i18n="modesBtn">更多模式</span></button>
@@ -901,6 +925,7 @@ const I18N={
       explorer:  {e:'🗺️',n:'全图探险家！'},
       speedster: {e:'🚀',n:'极速闪过！'},
       collector: {e:'🎁',n:'收藏家！'},
+      perfectClear:{e:'🌟',n:'完美通关！全30星！'},
     },
     helpBtn:'教程',howPlayTitle:'怎么玩？',howPlayStart:'出发！🚀',
     howPlaySteps:[
@@ -920,6 +945,7 @@ const I18N={
     customPresetEasy:'简单',customPresetMed:'中等',customPresetHard:'困难',
     customMines:'地雷数量',customDensity:'密度',customStart:'🚀 开始游戏',
     modesBestScore:'最高分',modesBestLevel:'最远关卡',modesClose:'关闭',
+    rateTitle:'喜欢这个游戏吗？',rateSub:'你的评价能帮助更多人发现它！',rateYes:'⭐ 去评分',rateLater:'稍后再说',rateNever:'不再提示',
   },
   en:{
     score:'SCORE',time:'TIME',level:'LEVEL',flags:'FLAGS',lives:'LIVES',
@@ -956,6 +982,7 @@ const I18N={
       explorer:  {e:'🗺️',n:'Full Explorer!'},
       speedster: {e:'🚀',n:'Speedster!'},
       collector: {e:'🎁',n:'Collector!'},
+      perfectClear:{e:'🌟',n:'Perfect Clear! All 30 stars!'},
     },
     helpBtn:'How to Play',howPlayTitle:'How to Play?',howPlayStart:"Let's Go! 🚀",
     howPlaySteps:[
@@ -975,6 +1002,7 @@ const I18N={
     customPresetEasy:'Easy',customPresetMed:'Medium',customPresetHard:'Hard',
     customMines:'Mines',customDensity:'Density',customStart:'🚀 Start',
     modesBestScore:'Best Score',modesBestLevel:'Best Level',modesClose:'Close',
+    rateTitle:'Enjoying the game?',rateSub:'Your review helps others discover it!',rateYes:'⭐ Rate Us',rateLater:'Maybe Later',rateNever:'Never Ask Again',
   }
 };
 let lang=localStorage.getItem('sweeper-lang')||'zh';
@@ -1025,6 +1053,20 @@ function renderMapScreen(){
     zh:['入门·6×6','初级·8×8','中级·9×9','高级·10×10','专家·10×10','挑战·11×11','极难·11×11','史诗·12×12','传奇·12×12','神话·13×13'],
     en:['Starter·6×6','Easy·8×8','Medium·9×9','Hard·10×10','Expert·10×10','Chall·11×11','Brutal·11×11','Epic·12×12','Legend·12×12','Myth·13×13']
   };
+  // Update total star progress bar
+  const totalStars=Array.from({length:10},(_,i)=>getStars(i+1)).reduce((a,b)=>a+b,0);
+  const fill=document.getElementById('mapStarFill');const lbl=document.getElementById('mapStarLabel');
+  if(fill)fill.style.width=`${Math.round(totalStars/30*100)}%`;
+  if(lbl)lbl.textContent=`${totalStars} / 30 ⭐`;
+  // Daily challenge red dot + streak chip
+  const dailyBtn=document.getElementById('mapDailyBtn');
+  const streakChip=document.getElementById('dailyStreakChip');
+  if(dailyBtn){
+    const done=isDailyDone();
+    dailyBtn.classList.toggle('has-dot',!done);
+    const streak=getDailyStreak();
+    if(streakChip){streakChip.style.display=streak>1?'':'none';streakChip.textContent=`🔥${streak}`;}
+  }
   const container=document.getElementById('mapCards');if(!container)return;
   container.innerHTML=Array.from({length:10},(_,i)=>i+1).map(lv=>{
     const locked=lv>unlocked;
@@ -1099,10 +1141,11 @@ function playTone(freq,type,dur,vol=0.16,delay=0){
   gain.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+delay+dur);
   osc.start(ac.currentTime+delay);osc.stop(ac.currentTime+delay+dur);
 }
+const vibrate=p=>navigator.vibrate&&navigator.vibrate(p);
 const playReveal =()=>playTone(523,'sine',.12,.13);
-const playFlag   =()=>{playTone(659,'square',.1,.1);playTone(784,'square',.1,.08,.08);};
-const playMine   =()=>{playTone(100,'sawtooth',.5,.26);playTone(80,'sawtooth',.4,.2,.1);};
-const playWin    =()=>[523,659,784,1047].forEach((f,i)=>playTone(f,'sine',.25,.18,i*.12));
+const playFlag   =()=>{playTone(659,'square',.1,.1);playTone(784,'square',.1,.08,.08);vibrate(12);};
+const playMine   =()=>{playTone(100,'sawtooth',.5,.26);playTone(80,'sawtooth',.4,.2,.1);vibrate([40,20,60]);};
+const playWin    =()=>{[523,659,784,1047].forEach((f,i)=>playTone(f,'sine',.25,.18,i*.12));vibrate([20,30,20,30,80]);};
 const playHintSnd=()=>{playTone(880,'sine',.2,.15);playTone(1100,'sine',.2,.12,.15);};
 const playCombo  =()=>{playTone(784,'sine',.1,.16);playTone(1047,'sine',.12,.18,.1);};
 const playLoseLife=()=>playTone(200,'sawtooth',.3,.2);
@@ -1116,6 +1159,30 @@ function toggleMusic(){musicOn=!musicOn;localStorage.setItem('sweeper-music',mus
 function toggleSound(){soundOn=!soundOn;localStorage.setItem('sweeper-sound',soundOn?'1':'0');document.getElementById('btnSound').classList.toggle('muted',!soundOn);}
 
 // ─── Help / Tutorial ──────────────────────────────────────────────────────────
+// ─── Rate App ────────────────────────────────────────────────────────────────
+const STORE_URL='https://apps.apple.com/app/id'; // TODO: replace with actual app ID once published
+function maybePromptReview(){
+  if(localStorage.getItem('sweeper-rated'))return;
+  const won=parseInt(localStorage.getItem('stat-won')||'0');
+  if(won!==3)return; // trigger exactly on 3rd classic win
+  setTimeout(()=>{
+    document.getElementById('rateTitleEl').textContent=t('rateTitle');
+    document.getElementById('rateSubEl').textContent=t('rateSub');
+    document.getElementById('rateYesBtn').textContent=t('rateYes');
+    document.getElementById('rateLaterBtn').textContent=t('rateLater');
+    document.getElementById('rateNeverBtn').textContent=t('rateNever');
+    document.getElementById('rateModal').classList.add('show');
+  },1200);
+}
+function doRate(){
+  localStorage.setItem('sweeper-rated','1');
+  document.getElementById('rateModal').classList.remove('show');
+  window.open(STORE_URL,'_blank');
+}
+function dismissRate(permanent){
+  if(permanent)localStorage.setItem('sweeper-rated','skip');
+  document.getElementById('rateModal').classList.remove('show');
+}
 function openHelp(){
   document.getElementById('helpTitle').textContent=t('howPlayTitle');
   document.getElementById('helpStartBtn').textContent=t('howPlayStart');
@@ -1311,6 +1378,7 @@ function checkAchievements(won,stars){
     const wonCount=parseInt(localStorage.getItem('stat-won')||'0')+1;
     localStorage.setItem('stat-won',wonCount);
     if(wonCount>=20)unlockAch('veteran');
+    maybePromptReview();
   }
   if(!won)return;
   if(state.elapsed<30)unlockAch('lightning');
@@ -1746,7 +1814,12 @@ function revealAllMines(){
 function showOverlay(won){
   const stars=getStarCount();
   const isNew=won&&state.mode==='classic'&&setBest(state.level,state.score);
-  if(won&&state.mode==='classic')setStars(state.level,stars);
+  if(won&&state.mode==='classic'){
+    const prevTotal=Array.from({length:10},(_,i)=>getStars(i+1)).reduce((a,b)=>a+b,0);
+    setStars(state.level,stars);
+    const newTotal=Array.from({length:10},(_,i)=>getStars(i+1)).reduce((a,b)=>a+b,0);
+    if(prevTotal<30&&newTotal===30)setTimeout(()=>showPerfectClear(),900);
+  }
   document.getElementById('overlayEmoji').textContent=won?'🎉':'😅';
   document.getElementById('overlayTitle').textContent=won?t('winTitle'):t('loseTitle');
   document.getElementById('overlayTitle').style.color=won?'#16A34A':'#DC2626';
@@ -1848,7 +1921,7 @@ function renderGrid(){
     tile.addEventListener('click',()=>handleClick(r,c));
     tile.addEventListener('contextmenu',e=>{e.preventDefault();toggleFlag(r,c);});
     let pt=null;
-    tile.addEventListener('touchstart',()=>{pt=setTimeout(()=>{tile.classList.add('pressing');setTimeout(()=>tile.classList.remove('pressing'),500);toggleFlag(r,c);pt=null;},500);},{passive:true});
+    tile.addEventListener('touchstart',()=>{pt=setTimeout(()=>{tile.classList.add('pressing');setTimeout(()=>tile.classList.remove('pressing'),400);toggleFlag(r,c);pt=null;},350);},{passive:true});
     tile.addEventListener('touchend',()=>{if(pt){clearTimeout(pt);pt=null;}});
     tile.addEventListener('touchmove',()=>{if(pt){clearTimeout(pt);pt=null;}});
     grid.appendChild(tile);
@@ -1938,6 +2011,21 @@ function showToast(msg){const el=document.getElementById('toast');el.textContent
 function spawnConfetti(){
   const colors=['#F472B6','#FCD34D','#6EE7B7','#93C5FD','#C084FC','#FB923C','#34D399','#F87171'];
   for(let i=0;i<70;i++){const el=document.createElement('div');el.className='confetti-piece';el.style.cssText=`left:${Math.random()*100}vw;top:-10px;background:${colors[i%colors.length]};width:${6+Math.random()*10}px;height:${6+Math.random()*10}px;animation-delay:${Math.random()*1.8}s;animation-duration:${2+Math.random()*2}s;border-radius:${Math.random()>.5?'50%':'2px'}`;document.body.appendChild(el);setTimeout(()=>el.remove(),5000);}
+}
+function showPerfectClear(){
+  // Extra mega confetti burst
+  const colors=['#FFD700','#FFF','#FCD34D','#F472B6','#C084FC','#6EE7B7'];
+  for(let i=0;i<140;i++){const el=document.createElement('div');el.className='confetti-piece';el.style.cssText=`left:${Math.random()*100}vw;top:-10px;background:${colors[i%colors.length]};width:${8+Math.random()*14}px;height:${8+Math.random()*14}px;animation-delay:${Math.random()*2.4}s;animation-duration:${2.5+Math.random()*2}s;border-radius:${Math.random()>.5?'50%':'2px'}`;document.body.appendChild(el);setTimeout(()=>el.remove(),6000);}
+  // Toast banner
+  const banner=document.createElement('div');
+  banner.style.cssText='position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(0);z-index:1200;background:linear-gradient(135deg,#7C3AED,#4F46E5);color:white;font-family:Fredoka One,cursive;font-size:clamp(22px,6vw,36px);padding:24px 36px;border-radius:28px;text-align:center;box-shadow:0 16px 48px rgba(0,0,0,0.5);transition:transform .4s cubic-bezier(.34,1.56,.64,1)';
+  banner.innerHTML='🌟 完美通关！<br><span style="font-size:.6em;opacity:.85">全 30 颗星已收集！</span>';
+  if(lang!=='zh')banner.innerHTML='🌟 Perfect Clear!<br><span style="font-size:.6em;opacity:.85">All 30 stars collected!</span>';
+  document.body.appendChild(banner);
+  requestAnimationFrame(()=>{requestAnimationFrame(()=>{banner.style.transform='translate(-50%,-50%) scale(1)';});});
+  vibrate([80,40,80,40,200]);
+  setTimeout(()=>{banner.style.transform='translate(-50%,-50%) scale(0)';setTimeout(()=>banner.remove(),400);},3500);
+  unlockAch('perfectClear');
 }
 
 // ─── Turtle rotation ──────────────────────────────────────────────────────────
