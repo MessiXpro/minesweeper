@@ -1042,7 +1042,9 @@ function renderMapScreen(){
 
 function showMapScreen(){
   currentScreen='map';
-  if(state.mode==='survival')state.mode='classic';
+  state.mode='classic';
+  document.getElementById('survProgress').style.display='none';
+  document.getElementById('starStrip').style.display='none';
   renderMapScreen();
   document.getElementById('map-screen').style.display='flex';
   document.getElementById('game-wrap').style.display='none';
@@ -1144,7 +1146,16 @@ function openModes(){
   document.getElementById('taBest').textContent=taB?`${t('modesBestScore')}: ${parseInt(taB).toLocaleString()}`:'';
   const sB=localStorage.getItem('surv-best');
   document.getElementById('survBest').textContent=sB?`${t('modesBestLevel')}: ${sB}`:'';
-  selectPreset(_customPreset.preset);
+  const lastCustom=JSON.parse(localStorage.getItem('custom-last')||'null');
+  if(lastCustom){
+    const preset=lastCustom.size===8?'easy':lastCustom.size===9?'med':'hard';
+    _customPreset={...lastCustom,preset};
+    selectPreset(preset);
+    document.getElementById('mineSlider').value=lastCustom.mines;
+    onSliderChange();
+  }else{
+    selectPreset(_customPreset.preset);
+  }
   document.getElementById('modesModal').classList.add('show');
 }
 function closeModes(){
@@ -1174,6 +1185,15 @@ function onSliderChange(){
   const total=_customPreset.size*_customPreset.size;
   const pct=Math.round(v/total*100);
   document.getElementById('customDensityEl').textContent=`${t('customDensity')} ${pct}%${pct>40?' ⚠️':''}`;
+}
+function startCustomGame(){
+  closeModes();
+  state.mode='custom';
+  state.level=`custom-${_customPreset.size}x${_customPreset.mines}`;
+  state._customCfg={size:_customPreset.size,mines:_customPreset.mines};
+  localStorage.setItem('custom-last',JSON.stringify({size:_customPreset.size,mines:_customPreset.mines}));
+  showGameScreen();
+  initGame();
 }
 
 // ─── Time Attack ─────────────────────────────────────────────────────────────
@@ -1437,7 +1457,9 @@ let state={
 // ─── Init ─────────────────────────────────────────────────────────────────────
 function initGame(){
   if(state.mode==='survival')state.level=state.survLevel;
-  const cfg=LEVELS[Math.min(state.level,10)]||LEVELS[10];
+  const cfg=state.mode==='custom'&&state._customCfg
+    ? state._customCfg
+    : (LEVELS[Math.min(state.level,10)]||LEVELS[10]);
   Object.assign(state,{
     size:cfg.size,mines:cfg.mines,
     board:Array.from({length:cfg.size},()=>Array(cfg.size).fill(0)),
@@ -1691,6 +1713,7 @@ function endGame(won){
       },1000);
       return;
     }
+    if(state.mode==='custom'){setTimeout(()=>showOverlay(true),800);return;}
     setTimeout(()=>{checkAchievements(true,stars);showOverlay(true);},800);
   }else{
     if(state.mode==='time-attack'){
@@ -1721,8 +1744,8 @@ function revealAllMines(){
 }
 function showOverlay(won){
   const stars=getStarCount();
-  const isNew=won&&setBest(state.level,state.score);
-  if(won)setStars(state.level,stars);
+  const isNew=won&&state.mode==='classic'&&setBest(state.level,state.score);
+  if(won&&state.mode==='classic')setStars(state.level,stars);
   document.getElementById('overlayEmoji').textContent=won?'🎉':'😅';
   document.getElementById('overlayTitle').textContent=won?t('winTitle'):t('loseTitle');
   document.getElementById('overlayTitle').style.color=won?'#16A34A':'#DC2626';
