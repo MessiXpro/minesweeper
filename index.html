@@ -1752,7 +1752,7 @@ function showOverlay(won){
   document.getElementById('overlaySub').textContent=won?t('winSub'):t('loseSub');
   document.getElementById('overlayStars').textContent=won?'⭐'.repeat(stars)+'☆'.repeat(3-stars):'💥💥💥';
   document.getElementById('overlayScore').textContent=t('scoreLabel')+state.score.toLocaleString();
-  document.getElementById('overlayBest').textContent=isNew?t('newBest'):(won?t('bestLabel')+getBest(state.level).toLocaleString():'');
+  document.getElementById('overlayBest').textContent=isNew?t('newBest'):(won&&state.mode==='classic'?t('bestLabel')+getBest(state.level).toLocaleString():'');
   document.getElementById('overlayBtn').textContent=won?t('mapBtn'):t('playAgain');
   document.getElementById('overlay').classList.add('show');
   if(won)renderBestBar();
