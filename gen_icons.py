@@ -120,4 +120,43 @@ for size, name in [(180,'icon-180'),(192,'icon-192'),(512,'icon-512')]:
     icon = make_icon(size)
     icon.save(f'{out_dir}/{name}.png', 'PNG')
     print(f'OK {name}.png {size}x{size}')
+
+# ── App Store icon: 1024×1024, no alpha, no rounded corners ──────────────────
+def make_appstore_icon(size=1024):
+    """App Store requires RGB PNG, no transparency, no pre-rounded corners."""
+    s = size
+    cx, cy = s // 2, s // 2
+
+    # Start with full-square (no alpha mask at end)
+    img = Image.new('RGB', (s, s), (0, 0, 0))
+
+    # 1. Gradient background (purple → blue), full square
+    for y in range(s):
+        t = y / (s - 1)
+        col = lerp_color((80, 44, 195), (28, 110, 235), t)
+        ImageDraw.Draw(img).line([(0, y), (s - 1, y)], fill=col)
+
+    # 2. Centre glow
+    glow = Image.new('RGBA', (s, s), (0, 0, 0, 0))
+    gd = ImageDraw.Draw(glow)
+    for rr in range(int(s * 0.52), 0, -max(1, s // 60)):
+        a = int(50 * (1 - rr / (s * 0.52)) ** 1.6)
+        gd.ellipse([cx-rr, cy-rr, cx+rr, cy+rr], fill=(180, 150, 255, a))
+    img = Image.alpha_composite(img.convert('RGBA'), glow).convert('RGB')
+
+    # 3–5. Re-use RGBA star drawing then composite
+    star_layer = make_icon(size)                 # RGBA with rounded corners
+    # Flatten star_layer onto white, then composite via alpha
+    flat = Image.new('RGB', (s, s), (0, 0, 0))
+    flat.paste(img, (0, 0))
+    # Paste star_layer using its alpha as mask
+    img_rgba = img.convert('RGBA')
+    img_rgba = Image.alpha_composite(img_rgba, star_layer)
+    img = img_rgba.convert('RGB')               # drop alpha → no transparency
+
+    return img
+
+icon_as = make_appstore_icon(1024)
+icon_as.save(f'{out_dir}/icon-1024-appstore.png', 'PNG')
+print(f'OK icon-1024-appstore.png 1024x1024 (RGB, no alpha — App Store ready)')
 print('Done')
