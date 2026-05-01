@@ -1083,7 +1083,7 @@ function applyLang(){
   document.getElementById('overlayBtn').textContent=state.gameOver&&state.won?t('mapBtn'):t('playAgain');
   renderBestBar();
   if(currentScreen==='map')renderMapScreen();
-  if(document.getElementById('modesModal').classList.contains('show'))openModes();
+  const _mm=document.getElementById('modesModal');if(_mm&&_mm.classList.contains('show'))openModes();
 }
 function toggleLang(){lang=lang==='zh'?'en':'zh';localStorage.setItem('sweeper-lang',lang);applyLang();}
 
