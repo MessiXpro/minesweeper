@@ -1678,13 +1678,14 @@ function endGame(won){
       },900);
       return;
     }
-    if(typeof state.level==='number'&&state.level<10){setUnlockedLevel(state.level+1);state._justUnlocked=state.level+1;}
+    if(state.mode==='classic'&&typeof state.level==='number'&&state.level<10){setUnlockedLevel(state.level+1);state._justUnlocked=state.level+1;}
     if(state._dailyMode){localStorage.setItem(getDailyKey()+'-done','1');unlockAch('dailyHero');}
     if(state.mode==='survival'){
       state.survScore+=state.score;
       if(state.survLevel>=10){endSurvival(true);return;}
       state.survLevel++;
       setTimeout(()=>{
+        if(state.mode!=='survival')return;
         state.gameOver=false;state.won=false;
         initGame();
       },1000);
