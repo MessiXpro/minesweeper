@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Star Sweeper — App Store Screenshots</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:'Nunito',sans-serif;
+  background:#0f0824;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  padding:40px 20px 80px;
+  gap:64px;
+}
+h1{
+  font-family:'Fredoka One',cursive;
+  color:#c4b4f0;
+  font-size:22px;
+  text-align:center;
+  letter-spacing:2px;
+  margin-bottom:-32px;
+}
+.set-label{
+  font-family:'Fredoka One',cursive;
+  color:#7b6baf;
+  font-size:13px;
+  letter-spacing:3px;
+  text-transform:uppercase;
+  text-align:center;
+  margin-bottom:8px;
+}
+
+/* ── iPhone frame ── */
+.scene{display:flex;flex-direction:column;align-items:center;gap:10px;}
+.caption-top{
+  font-family:'Fredoka One',cursive;
+  font-size:15px;
+  color:#c4b4f0;
+  text-align:center;
+  max-width:300px;
+  line-height:1.4;
+}
+.phone-wrap{position:relative;width:300px;}
+.phone-frame{
+  width:300px;height:648px;
+  border-radius:54px;
+  background:#1a0a2e;
+  border:10px solid #2a1a4e;
+  box-shadow:
+    0 0 0 2px #3a2a6e,
+    0 0 0 3px #1a0a2e,
+    0 30px 80px rgba(0,0,0,0.7),
+    inset 0 0 0 1px rgba(255,255,255,0.08);
+  overflow:hidden;
+  position:relative;
+  display:flex;
+  flex-direction:column;
+}
+/* Notch */
+.notch{
+  position:absolute;top:0;left:50%;transform:translateX(-50%);
+  width:110px;height:28px;
+  background:#1a0a2e;
+  border-radius:0 0 20px 20px;
+  z-index:99;
+}
+.notch::after{
+  content:'';position:absolute;
+  width:50px;height:10px;top:8px;left:50%;transform:translateX(-50%);
+  background:#0a0618;border-radius:8px;
+}
+/* Side buttons */
+.phone-wrap::before{
+  content:'';position:absolute;
+  right:-13px;top:100px;width:5px;height:60px;
+  background:linear-gradient(180deg,#2a1a4e,#3a2a6e,#2a1a4e);
+  border-radius:0 4px 4px 0;
+}
+.phone-wrap::after{
+  content:'';position:absolute;
+  left:-13px;top:80px;width:5px;height:36px;
+  background:linear-gradient(180deg,#2a1a4e,#3a2a6e,#2a1a4e);
+  border-radius:4px 0 0 4px;
+  box-shadow:0 50px 0 #2a1a4e, 0 96px 0 #2a1a4e;
+}
+.screen{flex:1;overflow:hidden;position:relative;display:flex;flex-direction:column;}
+
+/* ═══════════════════════════════════ SHARED GAME UI ═══════════════════════════════════ */
+
+/* Sky background */
+.sky{
+  flex:1;
+  background:linear-gradient(180deg,#1A6FB5 0%,#2E8FD9 15%,#5BB5EF 38%,#84CFFA 62%,#B6E4FF 82%,#D8F0FF 100%);
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+
+/* Clouds */
+.cloud-shape{
+  position:absolute;
+  opacity:.85;
+}
+
+/* Particles */
+.particle{
+  position:absolute;font-size:14px;opacity:.7;
+  animation:pFloat linear infinite;
+}
+@keyframes pFloat{from{transform:translateY(100%) rotate(0)}to{transform:translateY(-20px) rotate(360deg);opacity:0}}
+
+/* Game panel */
+.game-panel{
+  margin:8px;border-radius:26px;
+  background:rgba(255,255,255,0.14);
+  border:2.5px solid rgba(255,255,255,0.6);
+  backdrop-filter:blur(6px);
+  box-shadow:0 8px 32px rgba(40,20,100,0.28);
+  overflow:hidden;
+  display:flex;flex-direction:column;
+  flex:1;
+}
+
+/* Top bar */
+.top-bar{
+  display:flex;align-items:center;gap:5px;
+  padding:8px 8px 4px;
+}
+.stat-chip{
+  background:rgba(255,255,255,0.92);
+  border:2px solid rgba(255,255,255,0.95);
+  border-radius:12px;padding:3px 8px;
+  box-shadow:0 2px 10px rgba(80,60,160,0.16);
+  display:flex;flex-direction:column;align-items:center;
+  min-width:50px;flex:1;
+}
+.stat-chip .lbl{font-family:'Fredoka One',cursive;font-size:7px;color:#a090c8;letter-spacing:1px;text-transform:uppercase}
+.stat-chip .val{font-family:'Fredoka One',cursive;font-size:16px;color:#2d1f6a;line-height:1;}
+.stat-chip.wide{flex:2;}
+.stat-chip.highlight{background:rgba(251,191,36,0.25);border-color:rgba(251,191,36,0.6);}
+.stat-chip.highlight .val{color:#d97706;}
+.stat-chip.danger{background:rgba(239,68,68,0.2);border-color:rgba(239,68,68,0.5);}
+.stat-chip.danger .val{color:#dc2626;}
+.stat-chip.life{background:rgba(239,68,68,0.15);border-color:rgba(239,68,68,0.4);}
+.map-btn{
+  background:rgba(255,255,255,0.92);border:2px solid rgba(255,255,255,0.95);
+  border-radius:12px;padding:0 10px;height:42px;
+  font-size:17px;cursor:pointer;color:#3d2f7a;
+  display:flex;align-items:center;font-family:'Fredoka One',cursive;
+}
+
+/* Star strip */
+.star-strip{
+  display:flex;gap:4px;padding:0 8px 6px;
+}
+.star-cond{
+  flex:1;background:rgba(255,255,255,0.18);border-radius:10px;
+  padding:5px 4px;text-align:center;
+  border:1.5px solid rgba(255,255,255,0.4);
+  display:flex;flex-direction:column;align-items:center;gap:1px;
+}
+.star-cond.done{background:rgba(251,191,36,0.3);border-color:rgba(251,191,36,0.6);}
+.star-cond .sc-icon{font-size:13px;}
+.star-cond .sc-text{font-size:8px;color:rgba(255,255,255,0.85);font-weight:800;font-family:'Fredoka One',cursive;}
+.star-cond.done .sc-text{color:#f59e0b;}
+
+/* Grid */
+.grid-area{padding:6px 8px 8px;flex:1;display:flex;align-items:center;justify-content:center;}
+.grid{display:grid;gap:2.5px;}
+.grid-8{grid-template-columns:repeat(8,1fr);}
+.grid-9{grid-template-columns:repeat(9,1fr);}
+.grid-10{grid-template-columns:repeat(10,1fr);}
+.tile{
+  aspect-ratio:1;border-radius:7px;
+  background:rgba(255,255,255,0.16);
+  border:1.5px solid rgba(255,255,255,0.32);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fredoka One',cursive;font-size:11px;font-weight:800;
+  transition:all .1s;
+}
+.tile.r{background:rgba(255,255,255,0.88);border-color:rgba(255,255,255,0.95);}
+.tile.f{background:rgba(251,191,36,0.25);border-color:rgba(251,191,36,0.5);color:#f59e0b;}
+.tile.boom{background:rgba(239,68,68,0.3);border-color:rgba(239,68,68,0.6);color:#ef4444;}
+.tile.green{background:rgba(110,231,183,0.25);border-color:rgba(110,231,183,0.5);color:#10b981;}
+.n1{color:#3B82F6}.n2{color:#16A34A}.n3{color:#DC2626}.n4{color:#7C3AED}
+.n5{color:#EA580C}.n6{color:#0891B2}.n7{color:#BE185D}.n8{color:#374151}
+.r.dot{color:#6b5fa8;font-size:7px;}
+
+/* Bottom home indicator */
+.home-ind{
+  height:24px;display:flex;align-items:center;justify-content:center;
+  background:rgba(0,0,0,0.1);
+}
+.home-ind::after{
+  content:'';width:100px;height:4px;
+  background:rgba(255,255,255,0.35);border-radius:4px;
+}
+
+/* ═══════════════════════════════════ SCREENSHOT 1 — MAP ═══════════════════════════════════ */
+
+.map-header{
+  padding:10px 10px 8px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.map-title{
+  font-family:'Fredoka One',cursive;font-size:22px;color:#1a3a7a;
+  text-align:center;text-shadow:0 2px 8px rgba(255,255,255,0.5);
+}
+.map-subtitle{font-size:10px;color:#4a6a9a;text-align:center;font-weight:700;}
+
+.star-bar-wrap{
+  background:rgba(255,255,255,0.85);border-radius:12px;
+  padding:6px 10px;display:flex;flex-direction:column;gap:3px;
+  border:2px solid rgba(255,255,255,0.95);
+  box-shadow:0 2px 10px rgba(80,60,160,0.12);
+}
+.star-bar-label{font-size:9px;font-weight:800;color:#6b5fa8;letter-spacing:1px;}
+.star-bar-track{height:8px;background:#e8e0ff;border-radius:6px;overflow:hidden;}
+.star-bar-fill{height:100%;border-radius:6px;background:linear-gradient(90deg,#f59e0b,#fbbf24);}
+.star-bar-count{font-family:'Fredoka One',cursive;font-size:12px;color:#3d2f7a;text-align:right;}
+
+.action-row{display:flex;gap:5px;padding:0 8px;}
+.action-btn{
+  flex:1;padding:8px 4px;border-radius:14px;
+  background:rgba(255,255,255,0.88);border:2px solid rgba(255,255,255,0.95);
+  box-shadow:0 3px 12px rgba(80,60,160,0.15);
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+  cursor:pointer;
+}
+.action-btn .ab-icon{font-size:20px;}
+.action-btn .ab-label{font-family:'Fredoka One',cursive;font-size:9px;color:#3d2f7a;}
+.action-btn.daily{background:rgba(254,243,199,0.95);border-color:rgba(251,191,36,0.6);}
+.action-btn.modes{background:rgba(237,233,254,0.95);border-color:rgba(167,139,250,0.6);}
+
+.level-grid{
+  flex:1;padding:8px;overflow:hidden;
+  display:grid;grid-template-columns:repeat(2,1fr);gap:6px;
+}
+.level-card{
+  border-radius:14px;padding:8px 10px;
+  background:rgba(255,255,255,0.85);
+  border:2px solid rgba(255,255,255,0.95);
+  box-shadow:0 3px 14px rgba(80,60,160,0.15);
+  display:flex;flex-direction:column;gap:3px;
+}
+.level-card.locked{background:rgba(255,255,255,0.35);border-color:rgba(255,255,255,0.5);}
+.lc-num{font-family:'Fredoka One',cursive;font-size:10px;color:#a090c8;}
+.lc-name{font-family:'Fredoka One',cursive;font-size:14px;color:#2d1f6a;}
+.lc-stars{font-size:14px;letter-spacing:1px;}
+.lc-diff{font-size:8px;color:#9080c0;font-weight:700;}
+.lc-lock{font-size:18px;opacity:.4;align-self:center;}
+
+/* ═══════════════════════════════════ SCREENSHOT 4 — SURVIVAL ═══════════════════════════════════ */
+
+.surv-progress{
+  display:flex;align-items:center;gap:2px;
+  padding:5px 8px 6px;overflow:hidden;
+}
+.surv-lv{
+  width:26px;height:26px;border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Fredoka One',cursive;font-size:11px;flex-shrink:0;
+}
+.surv-lv.done{background:#10b981;color:white;}
+.surv-lv.current{background:#f59e0b;color:white;box-shadow:0 0 12px rgba(245,158,11,0.7);}
+.surv-lv.locked{background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.3);}
+.surv-arrow{color:rgba(255,255,255,0.3);font-size:8px;flex-shrink:0;}
+
+/* ═══════════════════════════════════ SCREENSHOT 5 — PERFECT CLEAR ═══════════════════════════════════ */
+
+.overlay{
+  position:absolute;inset:0;
+  background:rgba(10,6,30,0.82);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;z-index:50;backdrop-filter:blur(4px);
+}
+.ov-emoji{font-size:44px;filter:drop-shadow(0 0 20px rgba(255,200,0,0.7));animation:pulse 1s ease-in-out infinite alternate;}
+@keyframes pulse{from{transform:scale(1)}to{transform:scale(1.1)}}
+.ov-title{font-family:'Fredoka One',cursive;font-size:22px;color:#fbbf24;text-shadow:0 0 20px rgba(251,191,36,0.6);}
+.ov-sub{font-family:'Fredoka One',cursive;font-size:12px;color:#c4b4f0;text-align:center;padding:0 20px;}
+.ov-stars{font-size:26px;letter-spacing:4px;margin:4px 0;}
+.ov-btn{
+  background:linear-gradient(135deg,#7c3aed,#4f46e5);
+  border:none;border-radius:14px;padding:10px 28px;
+  font-family:'Fredoka One',cursive;font-size:14px;color:white;cursor:pointer;
+  box-shadow:0 6px 20px rgba(124,58,237,0.45);margin-top:4px;
+}
+.ov-btn.ghost{background:transparent;border:2px solid rgba(255,255,255,0.25);color:rgba(255,255,255,0.7);box-shadow:none;}
+
+.confetti-piece{
+  position:absolute;
+  width:8px;height:8px;
+  border-radius:2px;
+  animation:confettiFall linear infinite;
+}
+@keyframes confettiFall{
+  from{transform:translateY(-20px) rotate(0);opacity:1}
+  to{transform:translateY(500px) rotate(720deg);opacity:0}
+}
+
+/* ── Caption style ── */
+.caption-en{
+  font-family:'Fredoka One',cursive;
+  font-size:13px;
+  color:#9080c0;
+  text-align:center;
+  max-width:300px;
+}
+.screen-num{
+  font-family:'Fredoka One',cursive;
+  font-size:11px;
+  color:#4a3a7a;
+  letter-spacing:2px;
+  text-transform:uppercase;
+}
+
+/* ── Page header ── */
+.page-header{
+  text-align:center;
+  display:flex;flex-direction:column;gap:6px;
+  align-items:center;
+  margin-bottom:8px;
+}
+.page-title{font-family:'Fredoka One',cursive;font-size:28px;color:#c4b4f0;letter-spacing:2px;}
+.page-sub{font-size:12px;color:#7060a0;letter-spacing:1px;}
+
+/* ── Grid of all screenshots ── */
+.all-screens{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+  gap:48px;
+  justify-items:center;
+  max-width:1100px;
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-title">⭐ 星星扫雷 · Star Sweeper</div>
+  <div class="page-sub">APP STORE SCREENSHOT MOCKUPS — iPhone 6.7"</div>
+</div>
+
+<div class="all-screens">
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREENSHOT 1 — Map Screen
+══════════════════════════════════════════════════════════ -->
+<div class="scene">
+  <div class="screen-num">01 / 05</div>
+  <div class="caption-top">10关闯关，越来越难！</div>
+  <div class="phone-wrap">
+    <div class="phone-frame">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="sky" style="padding-top:28px;">
+
+          <!-- Decorative clouds -->
+          <svg class="cloud-shape" style="top:14px;left:8px;width:90px;opacity:.6" viewBox="0 0 120 60"><ellipse cx="60" cy="40" rx="55" ry="22" fill="white"/><ellipse cx="38" cy="32" rx="30" ry="20" fill="white"/><ellipse cx="80" cy="28" rx="25" ry="18" fill="white"/></svg>
+          <svg class="cloud-shape" style="top:10px;right:5px;width:70px;opacity:.5" viewBox="0 0 120 60"><ellipse cx="60" cy="40" rx="55" ry="22" fill="white"/><ellipse cx="38" cy="32" rx="30" ry="20" fill="white"/><ellipse cx="80" cy="28" rx="25" ry="18" fill="white"/></svg>
+
+          <!-- Map header -->
+          <div class="map-header">
+            <div class="map-title">⭐ 星星扫雷</div>
+            <!-- Star progress bar -->
+            <div class="star-bar-wrap">
+              <div style="display:flex;justify-content:space-between;align-items:center;">
+                <div class="star-bar-label">⭐ 星星进度</div>
+                <div class="star-bar-count">18 / 30 ⭐</div>
+              </div>
+              <div class="star-bar-track"><div class="star-bar-fill" style="width:60%"></div></div>
+            </div>
+            <!-- Action buttons -->
+            <div class="action-row">
+              <div class="action-btn daily">
+                <div class="ab-icon">📅</div>
+                <div class="ab-label" style="color:#b45309;">每日挑战</div>
+                <div style="position:absolute;top:-4px;right:-4px;width:10px;height:10px;background:#ef4444;border-radius:50%;border:2px solid white;"></div>
+              </div>
+              <div class="action-btn modes">
+                <div class="ab-icon">🎮</div>
+                <div class="ab-label" style="color:#6d28d9;">更多模式</div>
+              </div>
+              <div class="action-btn">
+                <div class="ab-icon">🏆</div>
+                <div class="ab-label">成就</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Level grid -->
+          <div class="level-grid">
+            <div class="level-card">
+              <div class="lc-num">LEVEL 1</div>
+              <div class="lc-name">入门</div>
+              <div class="lc-stars">⭐⭐⭐</div>
+              <div class="lc-diff">8×8 · 10雷</div>
+            </div>
+            <div class="level-card">
+              <div class="lc-num">LEVEL 2</div>
+              <div class="lc-name">初级</div>
+              <div class="lc-stars">⭐⭐⭐</div>
+              <div class="lc-diff">8×8 · 12雷</div>
+            </div>
+            <div class="level-card">
+              <div class="lc-num">LEVEL 3</div>
+              <div class="lc-name">中级</div>
+              <div class="lc-stars">⭐⭐☆</div>
+              <div class="lc-diff">9×9 · 15雷</div>
+            </div>
+            <div class="level-card">
+              <div class="lc-num">LEVEL 4</div>
+              <div class="lc-name">高级</div>
+              <div class="lc-stars">⭐⭐☆</div>
+              <div class="lc-diff">9×9 · 18雷</div>
+            </div>
+            <div class="level-card">
+              <div class="lc-num">LEVEL 5</div>
+              <div class="lc-name">专家</div>
+              <div class="lc-stars">⭐☆☆</div>
+              <div class="lc-diff">10×10 · 20雷</div>
+            </div>
+            <div class="level-card locked">
+              <div class="lc-num">LEVEL 6</div>
+              <div class="lc-lock">🔒</div>
+            </div>
+          </div>
+        </div>
+        <div class="home-ind"></div>
+      </div>
+    </div>
+  </div>
+  <div class="caption-en">10 Levels of Puzzle Adventure</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREENSHOT 2 — Classic Gameplay + Star Strip
+══════════════════════════════════════════════════════════ -->
+<div class="scene">
+  <div class="screen-num">02 / 05</div>
+  <div class="caption-top">三星挑战，每局都有目标</div>
+  <div class="phone-wrap">
+    <div class="phone-frame">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="sky" style="padding-top:28px;">
+          <!-- Clouds -->
+          <svg class="cloud-shape" style="top:14px;right:10px;width:80px;opacity:.55" viewBox="0 0 120 60"><ellipse cx="60" cy="40" rx="55" ry="22" fill="white"/><ellipse cx="38" cy="32" rx="30" ry="20" fill="white"/><ellipse cx="80" cy="28" rx="25" ry="18" fill="white"/></svg>
+
+          <div class="game-panel">
+            <!-- Top bar -->
+            <div class="top-bar">
+              <div class="map-btn" style="font-size:14px;height:36px;padding:0 8px;">🗺️</div>
+              <div class="stat-chip">
+                <div class="lbl">关卡</div>
+                <div class="val">Lv.3</div>
+              </div>
+              <div class="stat-chip wide" style="background:rgba(255,255,255,0.88);">
+                <div class="lbl">⏱ 时间</div>
+                <div class="val">1:24</div>
+              </div>
+              <div class="stat-chip">
+                <div class="lbl">💣 雷</div>
+                <div class="val">8</div>
+              </div>
+              <div class="stat-chip">
+                <div class="lbl">分数</div>
+                <div class="val">320</div>
+              </div>
+            </div>
+
+            <!-- Star strip -->
+            <div class="star-strip">
+              <div class="star-cond done">
+                <div class="sc-icon">⭐</div>
+                <div class="sc-text">通关</div>
+              </div>
+              <div class="star-cond done">
+                <div class="sc-icon">⭐</div>
+                <div class="sc-text">零踩雷</div>
+              </div>
+              <div class="star-cond">
+                <div class="sc-icon">⭐</div>
+                <div class="sc-text">120秒内</div>
+              </div>
+            </div>
+
+            <!-- Grid (9×9 partial) -->
+            <div class="grid-area">
+              <div class="grid grid-9" style="width:100%;">
+                <!-- Row 1 -->
+                <div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile f">🚩</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r dot">·</div>
+                <!-- Row 2 -->
+                <div class="tile r dot">·</div><div class="tile r n2">2</div><div class="tile r n2">2</div><div class="tile r n2">2</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r n2">2</div><div class="tile r n1">1</div>
+                <!-- Row 3 -->
+                <div class="tile r n1">1</div><div class="tile r n3">3</div><div class="tile f">🚩</div><div class="tile r n2">2</div><div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r n2">2</div><div class="tile f">🚩</div><div class="tile r n1">1</div>
+                <!-- Row 4 -->
+                <div class="tile r n1">1</div><div class="tile r n2">2</div><div class="tile r n2">2</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r n1">1</div><div class="tile r n1">1</div><div class="tile r dot">·</div>
+                <!-- Row 5 -->
+                <div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r dot">·</div>
+                <!-- Row 6 unrevealed -->
+                <div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div>
+                <!-- Row 7 unrevealed -->
+                <div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div>
+                <!-- Row 8 unrevealed -->
+                <div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div>
+                <!-- Row 9 unrevealed -->
+                <div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div>
+              </div>
+            </div>
+
+            <!-- Combo indicator -->
+            <div style="display:flex;justify-content:center;padding-bottom:8px;">
+              <div style="background:rgba(251,191,36,0.25);border:1.5px solid rgba(251,191,36,0.5);border-radius:12px;padding:4px 14px;display:flex;align-items:center;gap:5px;">
+                <span style="font-size:14px;">🔥</span>
+                <span style="font-family:'Fredoka One',cursive;font-size:13px;color:#f59e0b;">x5 COMBO!</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="home-ind"></div>
+      </div>
+    </div>
+  </div>
+  <div class="caption-en">Chase 3 Stars Every Round</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREENSHOT 3 — Time Attack Mode
+══════════════════════════════════════════════════════════ -->
+<div class="scene">
+  <div class="screen-num">03 / 05</div>
+  <div class="caption-top">3分钟，翻得越多分越高！</div>
+  <div class="phone-wrap">
+    <div class="phone-frame">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="sky" style="padding-top:28px;">
+          <svg class="cloud-shape" style="top:16px;left:5px;width:75px;opacity:.5" viewBox="0 0 120 60"><ellipse cx="60" cy="40" rx="55" ry="22" fill="white"/><ellipse cx="38" cy="32" rx="30" ry="20" fill="white"/><ellipse cx="80" cy="28" rx="25" ry="18" fill="white"/></svg>
+
+          <div class="game-panel">
+            <!-- Top bar: TA mode with countdown prominent -->
+            <div class="top-bar">
+              <div class="map-btn" style="font-size:14px;height:36px;padding:0 8px;">🗺️</div>
+              <div class="stat-chip">
+                <div class="lbl">得分</div>
+                <div class="val">2,480</div>
+              </div>
+              <div class="stat-chip wide highlight">
+                <div class="lbl">⏱ 剩余</div>
+                <div class="val">1:44</div>
+              </div>
+              <div class="stat-chip">
+                <div class="lbl">已通关</div>
+                <div class="val">3局</div>
+              </div>
+              <div class="stat-chip">
+                <div class="lbl">最高</div>
+                <div class="val">3,200</div>
+              </div>
+            </div>
+
+            <!-- Mode label -->
+            <div style="padding:0 8px 5px;display:flex;gap:5px;align-items:center;">
+              <div style="background:rgba(251,191,36,0.2);border:1.5px solid rgba(251,191,36,0.4);border-radius:8px;padding:2px 10px;">
+                <span style="font-family:'Fredoka One',cursive;font-size:10px;color:#d97706;">⏱ 时间挑战模式</span>
+              </div>
+              <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:2px 10px;">
+                <span style="font-family:'Fredoka One',cursive;font-size:10px;color:rgba(255,255,255,0.7);">❤️❤️❤️</span>
+              </div>
+            </div>
+
+            <!-- Grid (9×9) -->
+            <div class="grid-area">
+              <div class="grid grid-9" style="width:100%;">
+                <div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r n2">2</div><div class="tile f">🚩</div><div class="tile r n2">2</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r dot">·</div>
+                <div class="tile r n1">1</div><div class="tile r n2">2</div><div class="tile f">🚩</div><div class="tile r n3">3</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r n2">2</div><div class="tile r dot">·</div>
+                <div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r n2">2</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r n2">2</div><div class="tile f">🚩</div><div class="tile r n1">1</div>
+                <div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r n2">2</div><div class="tile r n2">2</div><div class="tile f">🚩</div><div class="tile r n2">2</div><div class="tile r n1">1</div>
+                <div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile f">🚩</div><div class="tile r n2">2</div><div class="tile r n1">1</div><div class="tile r dot">·</div>
+                <div class="tile r n1">1</div><div class="tile r n2">2</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r dot">·</div>
+                <div class="tile"></div><div class="tile"></div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r n2">2</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r dot">·</div>
+                <div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div>
+                <div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div>
+              </div>
+            </div>
+
+            <!-- Score boost banner -->
+            <div style="display:flex;justify-content:center;gap:8px;padding-bottom:8px;">
+              <div style="background:rgba(167,139,250,0.2);border:1.5px solid rgba(167,139,250,0.4);border-radius:12px;padding:4px 14px;">
+                <span style="font-family:'Fredoka One',cursive;font-size:12px;color:#a78bfa;">+10 per tile ✨</span>
+              </div>
+              <div style="background:rgba(110,231,183,0.2);border:1.5px solid rgba(110,231,183,0.4);border-radius:12px;padding:4px 14px;">
+                <span style="font-family:'Fredoka One',cursive;font-size:12px;color:#6ee7b7;">+100 通关奖励</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="home-ind"></div>
+      </div>
+    </div>
+  </div>
+  <div class="caption-en">3 Minutes — Flip Fast, Score Big!</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREENSHOT 4 — Survival Mode
+══════════════════════════════════════════════════════════ -->
+<div class="scene">
+  <div class="screen-num">04 / 05</div>
+  <div class="caption-top">只有一条命，能走多远？</div>
+  <div class="phone-wrap">
+    <div class="phone-frame">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="sky" style="padding-top:28px;">
+          <svg class="cloud-shape" style="top:12px;right:8px;width:85px;opacity:.52" viewBox="0 0 120 60"><ellipse cx="60" cy="40" rx="55" ry="22" fill="white"/><ellipse cx="38" cy="32" rx="30" ry="20" fill="white"/><ellipse cx="80" cy="28" rx="25" ry="18" fill="white"/></svg>
+
+          <div class="game-panel">
+            <!-- Top bar: Survival — 1 life -->
+            <div class="top-bar">
+              <div class="map-btn" style="font-size:14px;height:36px;padding:0 8px;">🗺️</div>
+              <div class="stat-chip life">
+                <div class="lbl">生命</div>
+                <div class="val">❤️</div>
+              </div>
+              <div class="stat-chip wide highlight">
+                <div class="lbl">当前关卡</div>
+                <div class="val">第4关</div>
+              </div>
+              <div class="stat-chip">
+                <div class="lbl">得分</div>
+                <div class="val">960</div>
+              </div>
+              <div class="stat-chip">
+                <div class="lbl">最远</div>
+                <div class="val">第6关</div>
+              </div>
+            </div>
+
+            <!-- Survival progress bar -->
+            <div class="surv-progress">
+              <div class="surv-lv done">1</div>
+              <div class="surv-arrow">›</div>
+              <div class="surv-lv done">2</div>
+              <div class="surv-arrow">›</div>
+              <div class="surv-lv done">3</div>
+              <div class="surv-arrow">›</div>
+              <div class="surv-lv current">4</div>
+              <div class="surv-arrow">›</div>
+              <div class="surv-lv locked">5</div>
+              <div class="surv-arrow">›</div>
+              <div class="surv-lv locked">6</div>
+              <div class="surv-arrow">›</div>
+              <div class="surv-lv locked" style="font-size:8px;">···</div>
+            </div>
+
+            <!-- Mode label -->
+            <div style="padding:0 8px 5px;">
+              <div style="background:rgba(239,68,68,0.15);border:1.5px solid rgba(239,68,68,0.35);border-radius:8px;padding:2px 10px;display:inline-block;">
+                <span style="font-family:'Fredoka One',cursive;font-size:10px;color:#f87171;">💀 生存模式 · 踩雷即结束</span>
+              </div>
+            </div>
+
+            <!-- Grid (9×9) -->
+            <div class="grid-area">
+              <div class="grid grid-9" style="width:100%;">
+                <div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r n2">2</div><div class="tile f">🚩</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r dot">·</div>
+                <div class="tile r n1">1</div><div class="tile r n3">3</div><div class="tile f">🚩</div><div class="tile r n2">2</div><div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r n2">2</div><div class="tile r n1">1</div><div class="tile r dot">·</div>
+                <div class="tile r n1">1</div><div class="tile r n2">2</div><div class="tile r n2">2</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r n2">2</div><div class="tile f">🚩</div><div class="tile r n1">1</div><div class="tile r dot">·</div>
+                <div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r n2">2</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r dot">·</div>
+                <div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r n1">1</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r dot">·</div>
+                <div class="tile"></div><div class="tile"></div><div class="tile r n1">1</div><div class="tile r n2">2</div><div class="tile r n1">1</div><div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r dot">·</div><div class="tile r dot">·</div>
+                <div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div>
+                <div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div>
+                <div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div><div class="tile"></div>
+              </div>
+            </div>
+
+            <div style="display:flex;justify-content:center;padding-bottom:8px;">
+              <div style="background:rgba(239,68,68,0.12);border:1.5px solid rgba(239,68,68,0.3);border-radius:10px;padding:4px 14px;">
+                <span style="font-family:'Fredoka One',cursive;font-size:11px;color:#f87171;">⚠️ 小心！只剩一条命</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="home-ind"></div>
+      </div>
+    </div>
+  </div>
+  <div class="caption-en">One Life. Ten Levels. How Far?</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════════
+     SCREENSHOT 5 — Perfect Clear (30-star celebration)
+══════════════════════════════════════════════════════════ -->
+<div class="scene">
+  <div class="screen-num">05 / 05</div>
+  <div class="caption-top">集满30星，触发烟花庆典！</div>
+  <div class="phone-wrap">
+    <div class="phone-frame">
+      <div class="notch"></div>
+      <div class="screen">
+        <div class="sky" style="padding-top:28px;position:relative;">
+          <svg class="cloud-shape" style="top:14px;left:6px;width:80px;opacity:.5" viewBox="0 0 120 60"><ellipse cx="60" cy="40" rx="55" ry="22" fill="white"/><ellipse cx="38" cy="32" rx="30" ry="20" fill="white"/><ellipse cx="80" cy="28" rx="25" ry="18" fill="white"/></svg>
+
+          <div class="game-panel" style="filter:blur(1px) brightness(0.7);">
+            <!-- Dimmed game board in background -->
+            <div class="top-bar">
+              <div class="map-btn" style="font-size:14px;height:36px;padding:0 8px;">🗺️</div>
+              <div class="stat-chip"><div class="lbl">关卡</div><div class="val">Lv.10</div></div>
+              <div class="stat-chip wide"><div class="lbl">⏱ 时间</div><div class="val">6:02</div></div>
+              <div class="stat-chip"><div class="lbl">分数</div><div class="val">4,120</div></div>
+            </div>
+            <div class="grid-area" style="flex:1">
+              <div class="grid grid-10" style="width:100%">
+                <!-- All revealed = perfect clear -->
+                <div class="tile r green">·</div><div class="tile r green">·</div><div class="tile r green n1">1</div><div class="tile f">🚩</div><div class="tile r green n1">1</div><div class="tile r green">·</div><div class="tile r green">·</div><div class="tile r green n1">1</div><div class="tile r green">·</div><div class="tile r green">·</div>
+                <div class="tile r green">·</div><div class="tile r green n2">2</div><div class="tile f">🚩</div><div class="tile r green n3">3</div><div class="tile r green n1">1</div><div class="tile r green">·</div><div class="tile r green n1">1</div><div class="tile r green n2">2</div><div class="tile r green n1">1</div><div class="tile r green">·</div>
+                <div class="tile r green n1">1</div><div class="tile r green n2">2</div><div class="tile r green n2">2</div><div class="tile r green n1">1</div><div class="tile r green">·</div><div class="tile r green n1">1</div><div class="tile r green n2">2</div><div class="tile f">🚩</div><div class="tile r green n1">1</div><div class="tile r green">·</div>
+                <div class="tile r green">·</div><div class="tile r green">·</div><div class="tile r green n1">1</div><div class="tile r green">·</div><div class="tile r green n2">2</div><div class="tile r green n2">2</div><div class="tile f">🚩</div><div class="tile r green n2">2</div><div class="tile r green n1">1</div><div class="tile r green">·</div>
+                <div class="tile r green">·</div><div class="tile r green">·</div><div class="tile r green">·</div><div class="tile r green">·</div><div class="tile r green n1">1</div><div class="tile f">🚩</div><div class="tile r green n2">2</div><div class="tile r green n1">1</div><div class="tile r green">·</div><div class="tile r green">·</div>
+                <div class="tile r green n1">1</div><div class="tile r green n2">2</div><div class="tile r green n1">1</div><div class="tile r green">·</div><div class="tile r green">·</div><div class="tile r green n1">1</div><div class="tile r green n1">1</div><div class="tile r green">·</div><div class="tile r green">·</div><div class="tile r green">·</div>
+                <div class="tile r green">·</div><div class="tile r green n1">1</div><div class="tile r green n2">2</div><div class="tile r green n1">1</div><div class="tile r green">·</div><div class="tile r green n2">2</div><div class="tile f">🚩</div><div class="tile r green n1">1</div><div class="tile r green">·</div><div class="tile r green">·</div>
+                <div class="tile r green">·</div><div class="tile r green">·</div><div class="tile r green">·</div><div class="tile r green">·</div><div class="tile r green">·</div><div class="tile r green">·</div><div class="tile r green">·</div><div class="tile r green">·</div><div class="tile r green">·</div><div class="tile r green">·</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Overlay: Perfect Clear celebration -->
+          <div class="overlay">
+            <!-- Confetti pieces -->
+            <div class="confetti-piece" style="background:#fbbf24;top:5%;left:15%;animation-duration:2.1s;animation-delay:0s;border-radius:50%;"></div>
+            <div class="confetti-piece" style="background:#f87171;top:3%;left:35%;animation-duration:1.8s;animation-delay:.3s;width:6px;height:10px;"></div>
+            <div class="confetti-piece" style="background:#6ee7b7;top:8%;left:55%;animation-duration:2.4s;animation-delay:.1s;"></div>
+            <div class="confetti-piece" style="background:#818cf8;top:2%;left:72%;animation-duration:2s;animation-delay:.5s;border-radius:50%;"></div>
+            <div class="confetti-piece" style="background:#fbbf24;top:6%;left:85%;animation-duration:1.9s;animation-delay:.2s;width:6px;height:10px;"></div>
+            <div class="confetti-piece" style="background:#f87171;top:1%;left:8%;animation-duration:2.2s;animation-delay:.4s;"></div>
+            <div class="confetti-piece" style="background:#6ee7b7;top:4%;left:48%;animation-duration:2.6s;animation-delay:.6s;border-radius:50%;"></div>
+            <div class="confetti-piece" style="background:#fbbf24;top:7%;left:92%;animation-duration:1.7s;animation-delay:.15s;"></div>
+            <div class="confetti-piece" style="background:#818cf8;top:2%;left:25%;animation-duration:2.3s;animation-delay:.35s;width:6px;height:10px;"></div>
+            <div class="confetti-piece" style="background:#f87171;top:5%;left:65%;animation-duration:2s;animation-delay:.55s;"></div>
+
+            <div class="ov-emoji">🎆</div>
+            <div class="ov-title">完美通关！</div>
+            <div class="ov-stars">⭐⭐⭐⭐⭐</div>
+            <div style="font-family:'Fredoka One',cursive;font-size:28px;color:#fbbf24;text-shadow:0 0 30px rgba(251,191,36,0.8);">30 / 30 ⭐</div>
+            <div class="ov-sub">你集齐了全部 30 颗星！<br>传说级扫雷大师！</div>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:4px;">
+              <div style="background:rgba(251,191,36,0.15);border:1.5px solid rgba(251,191,36,0.4);border-radius:10px;padding:4px 12px;">
+                <span style="font-family:'Fredoka One',cursive;font-size:11px;color:#fbbf24;">🏆 成就解锁：完美扫雷师</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-top:8px;">
+              <button class="ov-btn">再来一局</button>
+              <button class="ov-btn ghost">分享</button>
+            </div>
+          </div>
+        </div>
+        <div class="home-ind"></div>
+      </div>
+    </div>
+  </div>
+  <div class="caption-en">Collect All 30 Stars — Fireworks!</div>
+</div>
+
+</div><!-- /all-screens -->
+
+<!-- Instructions -->
+<div style="max-width:680px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:24px 28px;color:#9080c0;font-size:13px;line-height:1.7;">
+  <div style="font-family:'Fredoka One',cursive;font-size:15px;color:#c4b4f0;margin-bottom:10px;">📋 截图提交指南</div>
+  <ul style="padding-left:18px;display:flex;flex-direction:column;gap:6px;">
+    <li>App Store 要求：<strong style="color:#a090d0">iPhone 6.7"</strong> = 1290 × 2796 px（必须），iPad 12.9" = 2048 × 2732 px（可选）</li>
+    <li>截图方法：用此页面 + 浏览器截图工具，或用 <code>html2canvas</code> 导出每个 .phone-wrap 元素</li>
+    <li>标语文字可叠加到图片上（用 Canva / Figma / Photoshop）</li>
+    <li>最多 10 张截图，建议至少 3 张，5 张覆盖主要功能</li>
+    <li>文案见 <code>docs/app-store-copy.md</code>，截图配套标语见"截图文案"表格</li>
+  </ul>
+</div>
+
+</body>
+</html>
